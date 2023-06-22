@@ -13,6 +13,8 @@ import {
   Image,
   Alert,
 } from 'react-native';
+import { useDispatch } from 'react-redux';
+import { authSignInUser } from '../../Redux/authOperations';
 
 const initialState = {
   email: '',
@@ -27,6 +29,8 @@ export default function LoginScreen({ navigation }) {
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const [isPasswordHidden, setIsPasswordHidden] = useState(true);
 
+  const dispatch = useDispatch();
+
   const keyboardHide = () => {
     setIsKeyboardVisible(false);
     Keyboard.dismiss();
@@ -36,13 +40,14 @@ export default function LoginScreen({ navigation }) {
     const { email, password } = state;
 
     keyboardHide();
+    dispatch(authSignInUser(state));
     console.log(state);
     setState(initialState);
     checkTextInput();
 
-    if (email !== '' && password !== '' && validateEmail(email)) {
-      navigation.navigate('Home');
-    }
+    // if (email !== '' && password !== '' && validateEmail(email)) {
+    //   navigation.navigate('Home');
+    // }
   };
 
   const validateEmail = str => {

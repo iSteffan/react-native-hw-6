@@ -13,6 +13,8 @@ import {
   Alert,
 } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
+import { useDispatch } from 'react-redux';
+import { authSignUpUser } from '../../Redux/authOperations';
 
 const initialState = {
   login: '',
@@ -29,6 +31,8 @@ export default function RegistrationScreen({ navigation }) {
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const [isPasswordHidden, setIsPasswordHidden] = useState(true);
 
+  const dispatch = useDispatch();
+
   const keyboardHide = () => {
     setIsKeyboardVisible(false);
     Keyboard.dismiss();
@@ -38,13 +42,14 @@ export default function RegistrationScreen({ navigation }) {
     const { email, password, login } = state;
 
     keyboardHide();
+    dispatch(authSignUpUser(state));
     console.log(state);
     setState(initialState);
     checkTextInput();
 
-    if (email !== '' && password !== '' && login !== '' && validateEmail(email)) {
-      navigation.navigate('Home');
-    }
+    // if (email !== '' && password !== '' && login !== '' && validateEmail(email)) {
+    //   navigation.navigate('Home');
+    // }
   };
 
   const validateEmail = str => {
