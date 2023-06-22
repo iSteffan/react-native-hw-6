@@ -6,6 +6,8 @@ import LoginScreen from './Screens/authScreens/LoginScreen';
 import RegistrationScreen from './Screens/authScreens/RegistrationScreen';
 import MapScreen from './Screens/mainScreens/MapScreen';
 import CommentsScreen from './Screens/mainScreens/CommentsScreen';
+import { Provider } from 'react-redux';
+import { store } from './Redux/store';
 
 const AuthStack = createStackNavigator();
 
@@ -21,40 +23,42 @@ export default function App() {
   }
 
   return (
-    <NavigationContainer>
-      <AuthStack.Navigator>
-        <AuthStack.Screen
-          options={{
-            headerShown: false,
-          }}
-          name="Register"
-          component={RegistrationScreen}
-        />
-        <AuthStack.Screen
-          options={{
-            headerShown: false,
-          }}
-          name="Login"
-          component={LoginScreen}
-        />
-        <AuthStack.Screen
-          options={{
-            headerShown: false,
-          }}
-          name="Home"
-          component={Home}
-        />
-        <AuthStack.Screen
-          name="Коментарі"
-          component={CommentsScreen}
-          options={{ headerShown: true, headerTitleAlign: 'center' }}
-        />
-        <AuthStack.Screen
-          name="Карта"
-          component={MapScreen}
-          options={{ headerShown: true, headerTitleAlign: 'center' }}
-        />
-      </AuthStack.Navigator>
-    </NavigationContainer>
+    <Provider store={store}>
+      <NavigationContainer>
+        <AuthStack.Navigator>
+          <AuthStack.Screen
+            options={{
+              headerShown: false,
+            }}
+            name="Register"
+            component={RegistrationScreen}
+          />
+          <AuthStack.Screen
+            options={{
+              headerShown: false,
+            }}
+            name="Login"
+            component={LoginScreen}
+          />
+          <AuthStack.Screen
+            options={{
+              headerShown: false,
+            }}
+            name="Home"
+            component={Home}
+          />
+          <AuthStack.Screen
+            name="Коментарі"
+            component={CommentsScreen}
+            options={{ headerShown: true, headerTitleAlign: 'center' }}
+          />
+          <AuthStack.Screen
+            name="Карта"
+            component={MapScreen}
+            options={{ headerShown: true, headerTitleAlign: 'center' }}
+          />
+        </AuthStack.Navigator>
+      </NavigationContainer>
+    </Provider>
   );
 }
