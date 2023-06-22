@@ -13,7 +13,7 @@ const AuthStack = createStackNavigator();
 export default function App() {
   const [user, setUser] = useState(null);
   db.auth().onAuthStateChanged(user => setUser(user));
-  const routing = useRoute(false);
+  const routing = useRoute(user);
 
   const [fontsLoaded] = useFonts({
     'Roboto-Medium': require('./assets/fonts/Roboto-Medium.ttf'),
