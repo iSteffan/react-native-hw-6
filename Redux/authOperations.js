@@ -1,6 +1,8 @@
 import db from '../Firebase/config';
 import { authSlice } from './authReducer';
 
+const { updateUserProfile, authStateChange, authSignOut } = authSlice.actions;
+
 export const authSignUpUser =
   ({ email, password, login }) =>
   async (dispatch, getState) => {
@@ -18,7 +20,7 @@ export const authSignUpUser =
         userId: uid,
       };
 
-      dispatch(authSlice.actions.updateUserProfile(userUpdateProfile));
+      dispatch(updateUserProfile(userUpdateProfile));
     } catch (error) {
       console.log('error', error);
     }
@@ -33,4 +35,21 @@ export const authSignInUser =
     }
   };
 
-export const authSignOutUser = () => async (dispatch, getState) => {};
+export const authSignOutUser = () => async (dispatch, getState) => {
+  await db.auth().signOut();
+  dispatch(authSignOut());
+};
+
+export const authStateChangeUser = () => async (dispatch, getState) => {
+  await db.auth().onAuthStateChanged(user => {
+    if (user) {
+      const userUpdateProfile = {
+        login: user.displayName,
+        userId: user.uid,
+      };
+
+      dispatch(authStateChange({ stateChange: true }));
+      dispatch(updateUserProfile(userUpdateProfile));
+    }
+  });
+};

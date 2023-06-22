@@ -1,19 +1,20 @@
 import { useFonts } from 'expo-font';
-import React, { useState } from 'react';
+import React from 'react';
 import { Provider } from 'react-redux';
 import { store } from './Redux/store';
-import db from './Firebase/config';
-import { useRoute } from './router';
+// import db from './Firebase/config';
+// import { useRoute } from './router';
+import Main from './components/Main';
 
-import { createStackNavigator } from '@react-navigation/stack';
-import { NavigationContainer } from '@react-navigation/native';
+// import { createStackNavigator } from '@react-navigation/stack';
+// import { NavigationContainer } from '@react-navigation/native';
 
-const AuthStack = createStackNavigator();
+// const AuthStack = createStackNavigator();
 
 export default function App() {
-  const [user, setUser] = useState(null);
-  db.auth().onAuthStateChanged(user => setUser(user));
-  const routing = useRoute(user);
+  // const [user, setUser] = useState(null);
+  // db.auth().onAuthStateChanged(user => setUser(user));
+  // const routing = useRoute(user);
 
   const [fontsLoaded] = useFonts({
     'Roboto-Medium': require('./assets/fonts/Roboto-Medium.ttf'),
@@ -27,7 +28,7 @@ export default function App() {
 
   return (
     <Provider store={store}>
-      <NavigationContainer>{routing}</NavigationContainer>
+      <Main />
     </Provider>
   );
 }

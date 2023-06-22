@@ -4,10 +4,17 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import PostsScreen from './PostsScreen';
 import CreatePostsScreen from './CreatePostsScreen';
 import ProfileScreen from './ProfileScreen';
+import { authSignOutUser } from '../../Redux/authOperations';
+import { useDispatch } from 'react-redux';
 
 const BottomTab = createBottomTabNavigator();
 
 export default function Home({ navigation }) {
+  const dispatch = useDispatch();
+  const signOut = () => {
+    dispatch(authSignOutUser());
+  };
+
   return (
     <BottomTab.Navigator
       initialRouteName="Публікації"
@@ -36,10 +43,7 @@ export default function Home({ navigation }) {
             />
           ),
           headerRight: () => (
-            <Pressable
-              onPress={() => navigation.navigate('Login')}
-              style={{ marginRight: 10, marginTop: 10 }}
-            >
+            <Pressable onPress={signOut} style={{ marginRight: 10, marginTop: 10 }}>
               <Feather name="log-out" size={24} color="#BDBDBD" />
             </Pressable>
           ),
