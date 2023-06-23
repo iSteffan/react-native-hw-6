@@ -14,49 +14,60 @@ export const authSignUpUser =
   ({ email, password, login }) =>
   async (dispatch, getState) => {
     try {
-      await db.auth().createUserWithEmailAndPassword(email, password);
-      const user = await db.auth().currentUser;
+      await createUserWithEmailAndPassword(auth, email, password);
+      const user = auth.currentUser;
+      await updateProfile(user, { displayName: login });
 
-      await user.updateProfile({
-        displayName: login,
-      });
-      const { displayName, uid } = await db.auth().currentUser;
+      const { displayName, uid } = user;
 
-      const userUpdateProfile = {
-        login: displayName,
-        userId: uid,
-      };
-
-      dispatch(updateUserProfile(userUpdateProfile));
+      dispatch(
+        updateUserProfile({
+          userId: uid,
+          login: displayName,
+          email,
+        })
+      );
     } catch (error) {
       console.log('error', error);
     }
   };
+
 export const authSignInUser =
   ({ email, password }) =>
   async (dispatch, getState) => {
     try {
-      const user = await db.auth().signInWithEmailAndPassword(email, password);
+      await signInWithEmailAndPassword(auth, email, password);
     } catch (error) {
       console.log('error', error);
     }
   };
 
 export const authSignOutUser = () => async (dispatch, getState) => {
-  await db.auth().signOut();
-  dispatch(authSignOut());
+  try {
+    await signOut(auth);
+    dispatch(authSignOut());
+  } catch (error) {
+    console.log('error', error);
+  }
 };
 
 export const authStateChangeUser = () => async (dispatch, getState) => {
-  await db.auth().onAuthStateChanged(user => {
-    if (user) {
-      const userUpdateProfile = {
-        login: user.displayName,
-        userId: user.uid,
-      };
+  await onAuthStateChanged(auth, user => {
+    try {
+      if (user) {
+        const userUpdateProfile = {
+          userId: user.uid,
+          login: user.displayName,
+          email: user.email,
+        };
 
-      dispatch(authStateChange({ stateChange: true }));
-      dispatch(updateUserProfile(userUpdateProfile));
+        dispatch(authStateChange({ stateChange: true }));
+        dispatch(updateUserProfile(userUpdateProfile));
+      }
+    } catch (error) {
+      signOut(auth);
+      dispatch(authSignOut());
+      throw error;
     }
   });
 };

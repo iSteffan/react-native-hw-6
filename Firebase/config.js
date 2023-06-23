@@ -1,5 +1,4 @@
-import * as firebase from 'firebase';
-import 'firebase/auth';
+// initialize the project
 import { initializeApp } from 'firebase/app';
 // Function for connecting the database to the project
 import { getFirestore } from 'firebase/firestore';
@@ -7,6 +6,7 @@ import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { initializeAuth, getReactNativePersistence } from 'firebase/auth/react-native';
+// import { API_KEY } from 'react-native-dotenv';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyAzpX4yEbPX7c_rAmMisiBU7N1iIAcRGpI',
