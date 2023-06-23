@@ -1,7 +1,14 @@
-import db from '../Firebase/config';
+// import db from '../Firebase/config';
 import { authSlice } from './authReducer';
-
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  updateProfile,
+  signOut,
+} from 'firebase/auth';
 const { updateUserProfile, authStateChange, authSignOut } = authSlice.actions;
+import { auth } from '../Firebase/config';
 
 export const authSignUpUser =
   ({ email, password, login }) =>

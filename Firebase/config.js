@@ -1,5 +1,12 @@
 import * as firebase from 'firebase';
 import 'firebase/auth';
+import { initializeApp } from 'firebase/app';
+// Function for connecting the database to the project
+import { getFirestore } from 'firebase/firestore';
+// Function for connecting file storage to the project
+import { getStorage } from 'firebase/storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { initializeAuth, getReactNativePersistence } from 'firebase/auth/react-native';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyAzpX4yEbPX7c_rAmMisiBU7N1iIAcRGpI',
@@ -12,4 +19,14 @@ const firebaseConfig = {
   measurementId: 'G-14Y03EH1Z7',
 };
 
-export default firebase.initializeApp(firebaseConfig);
+// export default firebase.initializeApp(firebaseConfig);
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+
+export const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(AsyncStorage),
+});
+
+export const db = getFirestore(app);
+export const storage = getStorage(app);

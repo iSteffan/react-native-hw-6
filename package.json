@@ -24,7 +24,7 @@
     "expo-media-library": "~15.0.0",
     "expo-splash-screen": "~0.18.2",
     "expo-status-bar": "~1.4.4",
-    "firebase": "^7.9.0",
+    "firebase": "^9.23.0",
     "formik": "^2.4.1",
     "react": "18.2.0",
     "react-native": "0.71.8",
