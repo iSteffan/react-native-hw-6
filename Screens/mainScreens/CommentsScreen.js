@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Text,
   TouchableWithoutFeedback,
@@ -13,6 +13,8 @@ import {
   Pressable,
 } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
+import { useSelector } from 'react-redux';
+import db from '../../Firebase/config';
 
 function displayDateTime() {
   const months = [
@@ -42,19 +44,42 @@ function displayDateTime() {
 
 export default function CommentsScreen({ route }) {
   const postImage = route.params.image;
-  const [comments, setComments] = useState([]);
-  const [inputValue, setInputValue] = useState('');
+  const postId = route.params.postId;
+  const [comment, setComment] = useState('');
+  const [allComments, setAllComments] = useState([]);
+
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+
+  const { login } = useSelector(state => state.auth);
+
+  useEffect(() => {
+    getAllComments();
+  }, []);
 
   const keyboardHide = () => {
     Keyboard.dismiss();
     setIsKeyboardVisible(false);
   };
 
-  const sendComment = () => {
+  const createComment = async () => {
+    const date = displayDateTime();
+
+    db.firestore()
+      .collection('posts')
+      .doc(postId)
+      .collection('comments')
+      .add({ comment, login, date });
+
     keyboardHide();
-    setComments([...comments, { comment: inputValue, date: displayDateTime() }]);
-    setInputValue('');
+    setComment('');
+  };
+
+  const getAllComments = async () => {
+    db.firestore()
+      .collection('posts')
+      .doc(postId)
+      .collection('comments')
+      .onSnapshot(data => setAllComments(data.docs.map(doc => ({ ...doc.data(), id: doc.id }))));
   };
 
   return (
@@ -66,8 +91,8 @@ export default function CommentsScreen({ route }) {
             <View>
               <FlatList
                 scrollEnabled={true}
-                data={comments}
-                keyExtractor={(item, indx) => indx.toString()}
+                data={allComments}
+                keyExtractor={item => item.id}
                 renderItem={({ item }) => (
                   <View style={styles.commentContainer}>
                     <View style={styles.commentTextContainer}>
@@ -85,8 +110,8 @@ export default function CommentsScreen({ route }) {
 
             <View style={styles.inputWrap}>
               <TextInput
-                value={inputValue}
-                onChangeText={value => setInputValue(value)}
+                value={comment}
+                onChangeText={setComment}
                 placeholder="Коментувати..."
                 placeholderTextColor={'#BDBDBD'}
                 style={styles.input}
@@ -94,7 +119,7 @@ export default function CommentsScreen({ route }) {
                   setIsKeyboardVisible(true);
                 }}
               />
-              <Pressable style={styles.sendIcon} onPress={sendComment}>
+              <Pressable style={styles.sendIcon} onPress={createComment}>
                 <AntDesign name="arrowup" size={14} color="#FFFFFF" />
               </Pressable>
             </View>

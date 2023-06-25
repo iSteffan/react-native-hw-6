@@ -2,17 +2,38 @@ import { useState, useEffect } from 'react';
 import { Text, Image, View, StyleSheet, FlatList, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { EvilIcons } from '@expo/vector-icons';
+import db from '../../Firebase/config';
 
 export default function PostsScreen({ route, navigation }) {
   // console.log(route.params);
 
   const [posts, setPosts] = useState([]);
 
+  const getAllPost = async () => {
+    await db
+      .firestore()
+      .collection('posts')
+      .onSnapshot(data => setPosts(data.docs.map(doc => ({ ...doc.data(), id: doc.id }))));
+  };
+
+  // const getAllPosts = async () => {
+  //   try {
+  //     const postsRef = collection(db, 'posts');
+  //     const sortedPostsQuery = query(postsRef, orderBy('timePublished', 'desc'));
+
+  //     onSnapshot(sortedPostsQuery, snapshot => {
+  //       const sortedPosts = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+  //       setUserPosts(sortedPosts);
+  //     });
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
+
   useEffect(() => {
-    if (route.params) {
-      setPosts(prevState => [...prevState, route.params]);
-    }
-  }, [route.params]);
+    getAllPosts();
+  }, []);
+
   return (
     <View style={styles.container}>
       <View style={styles.userWrapper}>
@@ -33,7 +54,10 @@ export default function PostsScreen({ route, navigation }) {
               <Pressable
                 style={styles.comments}
                 onPress={() => {
-                  navigation.navigate('Коментарі', { image: item.photo });
+                  navigation.navigate('Коментарі', {
+                    image: item.photo,
+                    postId: item.id,
+                  });
                 }}
               >
                 <EvilIcons name="comment" size={24} color="#BDBDBD" />
