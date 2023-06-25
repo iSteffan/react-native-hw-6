@@ -27,6 +27,7 @@ export const authSignUpUser =
           email,
         })
       );
+      console.log('authSignUpUser: success ');
     } catch (error) {
       console.log('error', error);
     }
@@ -35,12 +36,26 @@ export const authSignUpUser =
 export const authSignInUser =
   ({ email, password }) =>
   async (dispatch, getState) => {
+    console.log('credential: ', email, password);
+
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      console.log('SignInUser: success ');
     } catch (error) {
       console.log('error', error);
     }
   };
+
+// export const authSignInUser =
+//   ({ email, password }) =>
+//   async (dispatch, getState) => {
+//     console.log('credential: ', email, password);
+//     try {
+//       await signInWithEmailAndPassword(auth, email, password);
+//     } catch (error) {
+//       const errorCode = error.code;
+//     }
+//   };
 
 export const authSignOutUser = () => async (dispatch, getState) => {
   try {

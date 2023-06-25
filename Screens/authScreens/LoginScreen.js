@@ -36,12 +36,15 @@ export default function LoginScreen({ navigation }) {
     Keyboard.dismiss();
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const { email, password } = state;
 
     keyboardHide();
-    dispatch(authSignInUser(state));
-    console.log(state);
+    try {
+      await dispatch(authSignInUser(state));
+    } catch (error) {
+      console.log(error);
+    }
     setState(initialState);
     checkTextInput();
 
