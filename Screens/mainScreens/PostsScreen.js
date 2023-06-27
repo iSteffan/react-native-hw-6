@@ -1,25 +1,16 @@
 import { useState, useEffect, useContext } from 'react';
-import { Text, Image, View, StyleSheet, FlatList, Pressable } from 'react-native';
+import { Text, Image, View, StyleSheet, FlatList, Pressable, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { EvilIcons } from '@expo/vector-icons';
 import { db } from '../../Firebase/config';
 import { useSelector } from 'react-redux';
 import { collection, doc, onSnapshot, orderBy, query, setDoc } from 'firebase/firestore';
+import { AntDesign } from '@expo/vector-icons';
 
 export default function PostsScreen({ route, navigation }) {
   // console.log(route.params);
   const [userPosts, setUserPosts] = useState([]);
 
-  // const [posts, setPosts] = useState([]);
-  // const [userPosts, setUserPosts] = useState([]);
   const { name, email, userAvatar, userId } = useSelector(state => state.auth);
-
-  // const getAllPosts = async () => {
-  //   await db
-  //     .firestore()
-  //     .collection('posts')
-  //     .onSnapshot(data => setPosts(data.docs.map(doc => ({ ...doc.data(), id: doc.id }))));
-  // };
 
   const getAllPosts = async () => {
     try {
@@ -66,7 +57,6 @@ export default function PostsScreen({ route, navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.userWrapper}>
-        {/* <Image source={{ uri: userAvatar }} resizeMode="cover" style={styles.image} /> */}
         <Image
           source={{ uri: userAvatar }}
           resizeMode="cover"
@@ -89,27 +79,39 @@ export default function PostsScreen({ route, navigation }) {
               <Pressable
                 style={styles.comments}
                 onPress={() => navigation.navigate('Comments', item)}
-                // onPress={() => {
-                //   navigation.navigate('Коментарі', {
-                //     image: item.photo,
-                //     postId: item.id,
-                //   });
-                // }}
               >
-                <EvilIcons name="comment" size={24} color="#BDBDBD" />
-                <Text style={styles.commentText}>0</Text>
+                <AntDesign name="message1" size={20} color="#BDBDBD" />
+                <Text
+                  // style={styles.commentText}
+                  style={{
+                    ...styles.commentText,
+                    color: item.comments?.length > 0 ? '#FF6C00' : '#BDBDBD',
+                  }}
+                >
+                  0
+                </Text>
               </Pressable>
+              <TouchableOpacity
+                style={styles.comments}
+                onPress={() => toggleLike(item.id, item.likes, item.likeStatus)}
+              >
+                <AntDesign
+                  name="like2"
+                  size={20}
+                  color={item.likes?.length > 0 ? '#FF6C00' : '#BDBDBD'}
+                />
+                <Text
+                  style={{
+                    ...styles.commentText,
+                    color: item.likes?.length > 0 ? '#FF6C00' : '#BDBDBD',
+                  }}
+                >
+                  {item.likes ? item.likes?.length : 0}
+                </Text>
+              </TouchableOpacity>
               <Pressable
                 style={styles.location}
                 onPress={() => navigation.navigate('Map', { location: item.location })}
-
-                // onPress={() =>
-                //   navigation.navigate('Карта', {
-                //     name: item.name,
-                //     latitude: item.latitude,
-                //     longitude: item.longitude,
-                //   })
-                // }
               >
                 <Ionicons name="ios-location-outline" size={24} color="#BDBDBD" />
                 <Text style={styles.locationText}>{item.position}</Text>
@@ -175,10 +177,12 @@ const styles = StyleSheet.create({
   comments: { flexDirection: 'row', alignItems: 'center' },
   location: { flexDirection: 'row', alignItems: 'center' },
   commentText: {
+    marginLeft: 5,
+
     fontFamily: 'Roboto-Medium',
     fontWeight: '400',
     fontSize: 16,
-    color: '#BDBDBD',
+    // color: '#BDBDBD',
     lineHeight: 19,
   },
   locationText: {
@@ -189,4 +193,16 @@ const styles = StyleSheet.create({
     lineHeight: 19,
     textDecorationLine: 'underline',
   },
+  // feedback: {
+  //   display: 'flex',
+  //   alignItems: 'center',
+  //   justifyContent: 'space-between',
+  //   flexDirection: 'row',
+  //   gap: 4,
+  // },
+  // feedbackCounter: {
+  //   fontFamily: 'Roboto-Regular',
+  //   fontSize: 16,
+  //   lineHeight: 19,
+  // },
 });
