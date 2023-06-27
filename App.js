@@ -6,11 +6,6 @@ import { store } from './Redux/store';
 // import { useRoute } from './router';
 import Main from './components/Main';
 
-// import { createStackNavigator } from '@react-navigation/stack';
-// import { NavigationContainer } from '@react-navigation/native';
-
-// const AuthStack = createStackNavigator();
-
 export default function App() {
   // const [user, setUser] = useState(null);
   // db.auth().onAuthStateChanged(user => setUser(user));

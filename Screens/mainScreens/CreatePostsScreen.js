@@ -15,9 +15,24 @@ import { Camera } from 'expo-camera';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
+import { useSelector } from 'react-redux';
+import { db, storage } from '../../Firebase/config';
+import * as MediaLibrary from 'expo-media-library';
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import { addDoc, collection } from 'firebase/firestore';
+
+const initialPost = {
+  image: null,
+  title: '',
+  position: '',
+  location: {
+    latitude: '',
+    longitude: '',
+  },
+};
 
 export default function CreatePostsScreen({ navigation }) {
-  const [name, setName] = useState('');
+  // const [name, setName] = useState('');
   const [location, setLocation] = useState('');
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const [isNameFocused, setIsNameFocused] = useState(false);
@@ -28,67 +43,100 @@ export default function CreatePostsScreen({ navigation }) {
 
   const [photoLocation, setPhotoLocation] = useState(null);
 
+  // const { userId, login } = useSelector(state => state.auth);
+
+  const [post, setPost] = useState(initialPost);
+  const { image, title, position } = post;
+  const { userId, name } = useSelector(state => state.auth);
+
   const keyboardHide = () => {
     setIsKeyboardVisible(false);
     Keyboard.dismiss();
   };
 
-  // const takePhoto = async () => {
-  //   const photo = await camera.takePictureAsync();
-  //   setPhoto(photo.uri);
-  //   // console.log(photo.uri);
+  const getLocation = async () => {
+    let {
+      coords: { latitude, longitude },
+    } = await Location.getCurrentPositionAsync({});
+    const region = await Location.reverseGeocodeAsync({ latitude, longitude });
 
-  //   let { status } = await Location.requestForegroundPermissionsAsync();
-  //   if (status !== 'granted') {
-  //     console.log('Permission to access location was denied');
-  //   }
+    setPost(prevState => ({
+      ...prevState,
+      location: { latitude, longitude },
+      position: region[0].region || region[0].subregion,
+    }));
+  };
 
-  //   const photoLocation = await Location.getCurrentPositionAsync({});
-
-  //   const coords = {
-  //     latitude: photoLocation.coords.latitude,
-  //     longitude: photoLocation.coords.longitude,
-  //   };
-
-  //   setPhotoLocation(coords);
-  // };
-
+  // take photo
   const takePhoto = async () => {
-    let { status } = await Camera.requestCameraPermissionsAsync();
-    if (status !== 'granted') {
-      console.log('Permission to access camera was denied');
-      return;
-    }
-
     try {
       const photo = await camera.takePictureAsync();
-      setPhoto(photo.uri);
+      if (!photo) return false;
 
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        console.log('Permission to access location was denied');
-      }
-
-      const photoLocation = await Location.getCurrentPositionAsync({});
-
-      const coords = {
-        latitude: photoLocation.coords.latitude,
-        longitude: photoLocation.coords.longitude,
-      };
-
-      setPhotoLocation(coords);
+      await MediaLibrary.createAssetAsync(photo.uri);
+      // Vibration.vibrate();
+      // setPhotoTaken(true);
+      getLocation();
+      setPost(prevState => ({ ...prevState, image: photo.uri }));
     } catch (error) {
-      console.log('Error taking photo:', error);
+      console.error('Error taking photo:', error);
     }
   };
 
-  const sendPhoto = () => {
-    navigation.navigate('Публікації', { photo, name, location, ...photoLocation });
-    setName('');
-    setLocation('');
-    setPhoto(null);
-    setIsKeyboardVisible(false);
-    // console.log({ photo, name, location, ...photoLocation })
+  const uploadPhotoToServer = async () => {
+    const response = await fetch(image);
+    const file = await response.blob();
+
+    const uniqueImageId = Date.now().toString();
+    const path = `images/${uniqueImageId}.jpeg`;
+
+    const storageRef = ref(storage, path);
+
+    const metadata = {
+      contentType: 'image/jpeg',
+    };
+
+    await uploadBytes(storageRef, file, metadata);
+
+    const downloadPhoto = await getDownloadURL(storageRef);
+    return downloadPhoto;
+  };
+  // upload post to server
+  const uploadPostToServer = async () => {
+    const photo = await uploadPhotoToServer();
+
+    // Cloud Firestore stores data in Documents, which are stored in Collections
+    const newPost = {
+      photo,
+      title,
+      position,
+      location: post.location,
+      comments: [],
+      likes: [],
+      userId,
+      name,
+      timePublished: +Date.now(),
+    };
+
+    try {
+      await addDoc(collection(db, 'posts'), newPost);
+    } catch (error) {
+      console.error('Error while adding doc: ', error.message);
+    }
+  };
+
+  // submit post
+  const handlePublishedPost = () => {
+    uploadPostToServer();
+    navigation.navigate('Posts', { ...post });
+    keyboardHide();
+    // resetFormPost();
+    // setDisabled(true);
+  };
+
+  const resetFormPost = () => {
+    // setPhotoTaken(false);
+    setPost(initialPost);
   };
 
   return (
@@ -98,7 +146,11 @@ export default function CreatePostsScreen({ navigation }) {
           {!isKeyboardVisible && (
             <View>
               <Camera style={styles.camera} ref={setCamera}>
-                <Pressable onPress={takePhoto} style={styles.snapContainer}>
+                <Pressable
+                  onPress={takePhoto}
+                  accessibilityLabel={'Add picture'}
+                  style={styles.snapContainer}
+                >
                   <MaterialIcons name="photo-camera" size={24} color="#BDBDBD" />
                 </Pressable>
               </Camera>
@@ -107,8 +159,10 @@ export default function CreatePostsScreen({ navigation }) {
           )}
 
           <TextInput
-            value={name}
-            onChangeText={value => setName(value)}
+            id="title"
+            value={title}
+            // onChangeText={value => setName(value)}
+            onChangeText={value => setPost(prevState => ({ ...prevState, title: value }))}
             placeholder="Назва..."
             placeholderTextColor={'#BDBDBD'}
             onFocus={() => {
@@ -133,8 +187,11 @@ export default function CreatePostsScreen({ navigation }) {
               }}
             />
             <TextInput
-              value={location}
-              onChangeText={value => setLocation(value)}
+              id="position"
+              value={position}
+              // value={location}
+              // onChangeText={value => setLocation(value)}
+              onChangeText={value => setPost(prevState => ({ ...prevState, position: value }))}
               placeholder="Місцевість..."
               placeholderTextColor={'#BDBDBD'}
               onFocus={() => {
@@ -150,11 +207,11 @@ export default function CreatePostsScreen({ navigation }) {
               }}
             />
           </View>
-          <Pressable onPress={sendPhoto} style={styles.sendBtn}>
+          <Pressable onPress={handlePublishedPost} style={styles.sendBtn}>
             <Text style={styles.buttonText}>Опублікувати</Text>
           </Pressable>
           <View style={styles.trashIconWrap}>
-            <Pressable style={styles.trashButton}>
+            <Pressable style={styles.trashButton} onPress={resetFormPost}>
               <FontAwesome5 name="trash-alt" size={24} color="#DADADA" />
             </Pressable>
           </View>

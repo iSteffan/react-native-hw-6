@@ -1,56 +1,120 @@
-import { useState, useEffect } from 'react';
-import { Text, Image, View, StyleSheet, FlatList, Pressable } from 'react-native';
+import { useState, useEffect, useContext } from 'react';
+import { Text, Image, View, StyleSheet, FlatList, Pressable, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { EvilIcons } from '@expo/vector-icons';
+import { db } from '../../Firebase/config';
+import { useSelector } from 'react-redux';
+import { collection, doc, onSnapshot, orderBy, query, setDoc } from 'firebase/firestore';
+import { AntDesign } from '@expo/vector-icons';
 
 export default function PostsScreen({ route, navigation }) {
   // console.log(route.params);
+  const [userPosts, setUserPosts] = useState([]);
 
-  const [posts, setPosts] = useState([]);
+  const { name, email, userAvatar, userId } = useSelector(state => state.auth);
+
+  const getAllPosts = async () => {
+    try {
+      // setIsLoading(true);
+      // setError(false);
+
+      const postsRef = collection(db, 'posts');
+      const sortedPostsQuery = query(postsRef, orderBy('timePublished', 'desc'));
+
+      onSnapshot(sortedPostsQuery, snapshot => {
+        const sortedPosts = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        setUserPosts(sortedPosts);
+      });
+    } catch (error) {
+      console.log(error);
+    }
+    // finally {
+    //   setIsLoading(false);
+    // }
+  };
 
   useEffect(() => {
-    if (route.params) {
-      setPosts(prevState => [...prevState, route.params]);
+    getAllPosts();
+  }, []);
+
+  const toggleLike = async (postId, likes, likeStatus) => {
+    try {
+      const userExist = likes.includes(userId);
+
+      if (userExist) {
+        const updatedLikes = likes.filter(user => user !== userId);
+        const postRef = doc(db, 'posts', postId);
+        await setDoc(postRef, { likes: updatedLikes, likeStatus: false }, { merge: true });
+      } else {
+        const updatedLikes = [...likes, userId];
+        const postRef = doc(db, 'posts', postId);
+        await setDoc(postRef, { likes: updatedLikes, likeStatus: true }, { merge: true });
+      }
+    } catch (error) {
+      console.log('error-message', error.message);
     }
-  }, [route.params]);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.userWrapper}>
-        <Image source={require('../../assets/images/user-photo-1.png')} style={styles.image} />
+        <Image
+          source={{ uri: userAvatar }}
+          resizeMode="cover"
+          style={{ width: 60, height: 60, borderRadius: 16, marginRight: 8 }}
+        />
         <View style={styles.userInfo}>
-          <Text style={styles.userName}>Natali Romanova</Text>
-          <Text style={styles.userEmail}>email@example.com</Text>
+          <Text style={styles.userName}>{name}</Text>
+          <Text style={styles.userEmail}>{email}</Text>
         </View>
       </View>
       <FlatList
-        data={posts}
+        data={userPosts}
+        showsVerticalScrollIndicator={false}
         keyExtractor={(item, indx) => indx.toString()}
         renderItem={({ item }) => (
           <View style={styles.postContainer}>
             <Image source={{ uri: item.photo }} style={styles.postImg} />
-            <Text style={styles.postName}>{item.name}</Text>
+            <Text style={styles.postName}>{item.title}</Text>
             <View style={styles.infoWrap}>
               <Pressable
                 style={styles.comments}
-                onPress={() => {
-                  navigation.navigate('Коментарі', { image: item.photo });
-                }}
+                onPress={() => navigation.navigate('Comments', item)}
               >
-                <EvilIcons name="comment" size={24} color="#BDBDBD" />
-                <Text style={styles.commentText}>0</Text>
+                <AntDesign name="message1" size={20} color="#BDBDBD" />
+                <Text
+                  // style={styles.commentText}
+                  style={{
+                    ...styles.commentText,
+                    color: item.comments?.length > 0 ? '#FF6C00' : '#BDBDBD',
+                  }}
+                >
+                  0
+                </Text>
               </Pressable>
+              <TouchableOpacity
+                style={styles.comments}
+                onPress={() => toggleLike(item.id, item.likes, item.likeStatus)}
+              >
+                <AntDesign
+                  name="like2"
+                  size={20}
+                  color={item.likes?.length > 0 ? '#FF6C00' : '#BDBDBD'}
+                />
+                <Text
+                  style={{
+                    ...styles.commentText,
+                    color: item.likes?.length > 0 ? '#FF6C00' : '#BDBDBD',
+                  }}
+                >
+                  {item.likes ? item.likes?.length : 0}
+                </Text>
+              </TouchableOpacity>
               <Pressable
                 style={styles.location}
-                onPress={() =>
-                  navigation.navigate('Карта', {
-                    name: item.name,
-                    latitude: item.latitude,
-                    longitude: item.longitude,
-                  })
-                }
+                onPress={() => navigation.navigate('Map', { location: item.location })}
               >
                 <Ionicons name="ios-location-outline" size={24} color="#BDBDBD" />
-                <Text style={styles.locationText}>{item.location}</Text>
+                <Text style={styles.locationText}>{item.position}</Text>
               </Pressable>
             </View>
           </View>
@@ -113,10 +177,12 @@ const styles = StyleSheet.create({
   comments: { flexDirection: 'row', alignItems: 'center' },
   location: { flexDirection: 'row', alignItems: 'center' },
   commentText: {
+    marginLeft: 5,
+
     fontFamily: 'Roboto-Medium',
     fontWeight: '400',
     fontSize: 16,
-    color: '#BDBDBD',
+    // color: '#BDBDBD',
     lineHeight: 19,
   },
   locationText: {
@@ -127,4 +193,16 @@ const styles = StyleSheet.create({
     lineHeight: 19,
     textDecorationLine: 'underline',
   },
+  // feedback: {
+  //   display: 'flex',
+  //   alignItems: 'center',
+  //   justifyContent: 'space-between',
+  //   flexDirection: 'row',
+  //   gap: 4,
+  // },
+  // feedbackCounter: {
+  //   fontFamily: 'Roboto-Regular',
+  //   fontSize: 16,
+  //   lineHeight: 19,
+  // },
 });

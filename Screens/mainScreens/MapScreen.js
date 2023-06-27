@@ -1,27 +1,41 @@
+import { useEffect, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 
-export default function MapScreen({ route }) {
-  const { name, latitude, longitude } = route.params;
+const MapScreen = ({ route }) => {
+  const [location, setLocation] = useState({});
+
+  // set location
+  useEffect(() => {
+    if (route.params) {
+      setLocation({
+        latitude: route.params.location.latitude,
+        longitude: route.params.location.longitude,
+      });
+    }
+  }, [route.params]);
 
   return (
     <View style={styles.container}>
-      <MapView
-        style={{
-          flex: 1,
-        }}
-        region={{
-          latitude: latitude,
-          longitude: longitude,
-          latitudeDelta: 0.001,
-          longitudeDelta: 0.006,
-        }}
-      >
-        <Marker title={name} coordinate={{ latitude: latitude, longitude: longitude }} />
-      </MapView>
+      {location && (
+        <MapView
+          style={{ flex: 1 }}
+          region={{
+            ...location,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          }}
+          mapType="standard"
+          minZoomLevel={8}
+        >
+          <Marker title="You are here" coordinate={location} />
+        </MapView>
+      )}
     </View>
   );
-}
+};
+
+export default MapScreen;
 
 const styles = StyleSheet.create({
   container: {
