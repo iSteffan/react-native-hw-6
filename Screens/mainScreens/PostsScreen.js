@@ -2,14 +2,15 @@ import { useState, useEffect, useContext } from 'react';
 import { Text, Image, View, StyleSheet, FlatList, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { EvilIcons } from '@expo/vector-icons';
-import db from '../../Firebase/config';
+import { db } from '../../Firebase/config';
 import { useSelector } from 'react-redux';
 import { collection, doc, onSnapshot, orderBy, query, setDoc } from 'firebase/firestore';
 
 export default function PostsScreen({ route, navigation }) {
   // console.log(route.params);
+  const [userPosts, setUserPosts] = useState([]);
 
-  const [posts, setPosts] = useState([]);
+  // const [posts, setPosts] = useState([]);
   // const [userPosts, setUserPosts] = useState([]);
   const { name, email, userAvatar, userId } = useSelector(state => state.auth);
 
@@ -65,14 +66,19 @@ export default function PostsScreen({ route, navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.userWrapper}>
-        <Image source={{ uri: userAvatar }} resizeMode="cover" style={styles.image} />
+        {/* <Image source={{ uri: userAvatar }} resizeMode="cover" style={styles.image} /> */}
+        <Image
+          source={{ uri: userAvatar }}
+          resizeMode="cover"
+          style={{ width: 60, height: 60, borderRadius: 16, marginRight: 8 }}
+        />
         <View style={styles.userInfo}>
           <Text style={styles.userName}>{name}</Text>
           <Text style={styles.userEmail}>{email}</Text>
         </View>
       </View>
       <FlatList
-        data={posts}
+        data={userPosts}
         showsVerticalScrollIndicator={false}
         keyExtractor={(item, indx) => indx.toString()}
         renderItem={({ item }) => (
@@ -82,28 +88,31 @@ export default function PostsScreen({ route, navigation }) {
             <View style={styles.infoWrap}>
               <Pressable
                 style={styles.comments}
-                onPress={() => {
-                  navigation.navigate('Коментарі', {
-                    image: item.photo,
-                    postId: item.id,
-                  });
-                }}
+                onPress={() => navigation.navigate('Comments', item)}
+                // onPress={() => {
+                //   navigation.navigate('Коментарі', {
+                //     image: item.photo,
+                //     postId: item.id,
+                //   });
+                // }}
               >
                 <EvilIcons name="comment" size={24} color="#BDBDBD" />
                 <Text style={styles.commentText}>0</Text>
               </Pressable>
               <Pressable
                 style={styles.location}
-                onPress={() =>
-                  navigation.navigate('Карта', {
-                    name: item.name,
-                    latitude: item.latitude,
-                    longitude: item.longitude,
-                  })
-                }
+                onPress={() => navigation.navigate('Map', { location: item.location })}
+
+                // onPress={() =>
+                //   navigation.navigate('Карта', {
+                //     name: item.name,
+                //     latitude: item.latitude,
+                //     longitude: item.longitude,
+                //   })
+                // }
               >
                 <Ionicons name="ios-location-outline" size={24} color="#BDBDBD" />
-                <Text style={styles.locationText}>{item.location}</Text>
+                <Text style={styles.locationText}>{item.position}</Text>
               </Pressable>
             </View>
           </View>

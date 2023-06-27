@@ -49,7 +49,7 @@ export default function CreatePostsScreen({ navigation }) {
     setName('');
     setLocation('');
     setPhoto(null);
-    setIsShowKeyboard(false);
+    isKeyboardVisible(false);
     // console.log({ photo, name, location, ...photoLocation })
   };
 
