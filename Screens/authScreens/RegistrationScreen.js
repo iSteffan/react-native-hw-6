@@ -241,13 +241,6 @@ export default function RegistrationScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  avatarPhoto: {
-    borderRadius: 16,
-    backgroundColor: '#F6F6F6',
-
-    width: 120,
-    height: 120,
-  },
   container: {
     alignItems: 'center',
     justifyContent: 'flex-end',
@@ -267,17 +260,33 @@ const styles = StyleSheet.create({
   avatar: {
     position: 'absolute',
     top: -50,
-    left: 150,
+    left: 135,
 
     width: 110,
     height: 110,
     backgroundColor: '#F6F6F6',
     borderRadius: 16,
   },
+  avatarPhoto: {
+    borderRadius: 16,
+    backgroundColor: '#F6F6F6',
+
+    width: 120,
+    height: 120,
+  },
   avatarButton: {
     position: 'absolute',
-    right: -12,
-    bottom: 10,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    bottom: 0,
+    right: -22,
+    width: 25,
+    height: 25,
+    borderRadius: 50,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderStyle: 'solid',
   },
   title: {
     marginBottom: 33,

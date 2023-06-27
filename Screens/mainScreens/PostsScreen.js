@@ -1,50 +1,79 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { Text, Image, View, StyleSheet, FlatList, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { EvilIcons } from '@expo/vector-icons';
 import db from '../../Firebase/config';
+import { useSelector } from 'react-redux';
+import { collection, doc, onSnapshot, orderBy, query, setDoc } from 'firebase/firestore';
 
 export default function PostsScreen({ route, navigation }) {
   // console.log(route.params);
 
   const [posts, setPosts] = useState([]);
-
-  const getAllPost = async () => {
-    await db
-      .firestore()
-      .collection('posts')
-      .onSnapshot(data => setPosts(data.docs.map(doc => ({ ...doc.data(), id: doc.id }))));
-  };
+  // const [userPosts, setUserPosts] = useState([]);
+  const { name, email, userAvatar, userId } = useSelector(state => state.auth);
 
   // const getAllPosts = async () => {
-  //   try {
-  //     const postsRef = collection(db, 'posts');
-  //     const sortedPostsQuery = query(postsRef, orderBy('timePublished', 'desc'));
-
-  //     onSnapshot(sortedPostsQuery, snapshot => {
-  //       const sortedPosts = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-  //       setUserPosts(sortedPosts);
-  //     });
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
+  //   await db
+  //     .firestore()
+  //     .collection('posts')
+  //     .onSnapshot(data => setPosts(data.docs.map(doc => ({ ...doc.data(), id: doc.id }))));
   // };
+
+  const getAllPosts = async () => {
+    try {
+      // setIsLoading(true);
+      // setError(false);
+
+      const postsRef = collection(db, 'posts');
+      const sortedPostsQuery = query(postsRef, orderBy('timePublished', 'desc'));
+
+      onSnapshot(sortedPostsQuery, snapshot => {
+        const sortedPosts = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        setUserPosts(sortedPosts);
+      });
+    } catch (error) {
+      console.log(error);
+    }
+    // finally {
+    //   setIsLoading(false);
+    // }
+  };
 
   useEffect(() => {
     getAllPosts();
   }, []);
 
+  const toggleLike = async (postId, likes, likeStatus) => {
+    try {
+      const userExist = likes.includes(userId);
+
+      if (userExist) {
+        const updatedLikes = likes.filter(user => user !== userId);
+        const postRef = doc(db, 'posts', postId);
+        await setDoc(postRef, { likes: updatedLikes, likeStatus: false }, { merge: true });
+      } else {
+        const updatedLikes = [...likes, userId];
+        const postRef = doc(db, 'posts', postId);
+        await setDoc(postRef, { likes: updatedLikes, likeStatus: true }, { merge: true });
+      }
+    } catch (error) {
+      console.log('error-message', error.message);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.userWrapper}>
-        <Image source={require('../../assets/images/user-photo-1.png')} style={styles.image} />
+        <Image source={{ uri: userAvatar }} resizeMode="cover" style={styles.image} />
         <View style={styles.userInfo}>
-          <Text style={styles.userName}>Natali Romanova</Text>
-          <Text style={styles.userEmail}>email@example.com</Text>
+          <Text style={styles.userName}>{name}</Text>
+          <Text style={styles.userEmail}>{email}</Text>
         </View>
       </View>
       <FlatList
         data={posts}
+        showsVerticalScrollIndicator={false}
         keyExtractor={(item, indx) => indx.toString()}
         renderItem={({ item }) => (
           <View style={styles.postContainer}>
