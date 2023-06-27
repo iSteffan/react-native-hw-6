@@ -15,72 +15,129 @@ import {
 import { AntDesign } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
 import db from '../../Firebase/config';
+import { collection, doc, addDoc, onSnapshot, updateDoc } from 'firebase/firestore';
 
-function displayDateTime() {
-  const months = [
-    'січня',
-    'лютого',
-    'березня',
-    'квітня',
-    'травня',
-    'червня',
-    'липня',
-    'серпня',
-    'вересня',
-    'жовтня',
-    'листопада',
-    'грудня',
-  ];
-  const now = new Date();
-  const date = now.getDate();
-  const month = months[now.getMonth()];
-  const year = now.getFullYear();
-  const hours = now.getHours().toString().padStart(2, '0');
-  const minutes = now.getMinutes().toString().padStart(2, '0');
+// function displayDateTime() {
+//   const months = [
+//     'січня',
+//     'лютого',
+//     'березня',
+//     'квітня',
+//     'травня',
+//     'червня',
+//     'липня',
+//     'серпня',
+//     'вересня',
+//     'жовтня',
+//     'листопада',
+//     'грудня',
+//   ];
+//   const now = new Date();
+//   const date = now.getDate();
+//   const month = months[now.getMonth()];
+//   const year = now.getFullYear();
+//   const hours = now.getHours().toString().padStart(2, '0');
+//   const minutes = now.getMinutes().toString().padStart(2, '0');
 
-  const dateTimeString = `${date} ${month}, ${year} | ${hours}:${minutes}`;
-  return dateTimeString;
-}
+//   const dateTimeString = `${date} ${month}, ${year} | ${hours}:${minutes}`;
+//   return dateTimeString;
+// }
 
 export default function CommentsScreen({ route }) {
   const postImage = route.params.image;
-  const postId = route.params.postId;
+  // const postId = route.params.postId;
   const [comment, setComment] = useState('');
   const [allComments, setAllComments] = useState([]);
 
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
 
-  const { login } = useSelector(state => state.auth);
+  const { name, userAvatar, email, userId } = useSelector(state => state.auth);
 
+  // const { login } = useSelector(state => state.auth);
+  const { id: postId, photo, userId: postOwnerId } = route.params;
+
+  const createComment = async () => {
+    const date = new Date().toLocaleDateString('uk-UA');
+    const time = new Date().toLocaleTimeString();
+
+    const postDocRef = await doc(db, 'posts', postId);
+    const newComment = {
+      timePublished: Date.now().toString(),
+      comment,
+      name,
+      email,
+      userAvatar,
+      date,
+      time,
+      owner: userId === postOwnerId ? 'user' : 'follower',
+    };
+
+    await addDoc(collection(postDocRef, 'comments'), newComment);
+    await updateDoc(postDocRef, {
+      comments: [...allComments, newComment],
+    });
+  };
+
+  const getAllComments = async () => {
+    const postDocRef = await doc(db, 'posts', postId);
+    onSnapshot(collection(postDocRef, 'comments'), snapshot => {
+      const allComments = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+      const sortedComments = [...allComments].sort((a, b) => {
+        const dateA = a.timePublished;
+        const dateB = b.timePublished;
+        return dateA - dateB;
+      });
+
+      return setComments(sortedComments);
+    });
+  };
+
+  // get all comments
   useEffect(() => {
     getAllComments();
-  }, []);
+  }, [userId, postId]);
+
+  // useEffect(() => {
+  //   getAllComments();
+  // }, []);
 
   const keyboardHide = () => {
     Keyboard.dismiss();
     setIsKeyboardVisible(false);
   };
 
-  const createComment = async () => {
-    const date = displayDateTime();
-
-    db.firestore()
-      .collection('posts')
-      .doc(postId)
-      .collection('comments')
-      .add({ comment, login, date });
-
-    keyboardHide();
+  // send comment
+  const handleSendComment = () => {
+    // if (!comment.trim()) {
+    //   Alert.alert(`Будь ласка, введіть свій коментар 😌`);
+    //   return;
+    // }
+    createComment();
+    Keyboard.dismiss();
+    // Alert.alert(`Ваш коментар успішно надіслано 😉`);
     setComment('');
   };
 
-  const getAllComments = async () => {
-    db.firestore()
-      .collection('posts')
-      .doc(postId)
-      .collection('comments')
-      .onSnapshot(data => setAllComments(data.docs.map(doc => ({ ...doc.data(), id: doc.id }))));
-  };
+  // const createComment = async () => {
+  //   const date = displayDateTime();
+
+  //   db.firestore()
+  //     .collection('posts')
+  //     .doc(postId)
+  //     .collection('comments')
+  //     .add({ comment, login, date });
+
+  //   keyboardHide();
+  //   setComment('');
+  // };
+
+  // const getAllComments = async () => {
+  //   db.firestore()
+  //     .collection('posts')
+  //     .doc(postId)
+  //     .collection('comments')
+  //     .onSnapshot(data => setAllComments(data.docs.map(doc => ({ ...doc.data(), id: doc.id }))));
+  // };
 
   return (
     <TouchableWithoutFeedback onPress={keyboardHide}>
@@ -100,7 +157,8 @@ export default function CommentsScreen({ route }) {
                       <Text style={styles.date}>{item.date}</Text>
                     </View>
                     <Image
-                      source={require('../../assets/images/user-photo-3.png')}
+                      source={{ uri: item.userAvatar }}
+                      // source={require('../../assets/images/user-photo-3.png')}
                       style={styles.image}
                     />
                   </View>
@@ -111,7 +169,8 @@ export default function CommentsScreen({ route }) {
             <View style={styles.inputWrap}>
               <TextInput
                 value={comment}
-                onChangeText={setComment}
+                onChangeText={value => setComment(value)}
+                // onChangeText={setComment}
                 placeholder="Коментувати..."
                 placeholderTextColor={'#BDBDBD'}
                 style={styles.input}
@@ -119,7 +178,7 @@ export default function CommentsScreen({ route }) {
                   setIsKeyboardVisible(true);
                 }}
               />
-              <Pressable style={styles.sendIcon} onPress={createComment}>
+              <Pressable style={styles.sendIcon} onPress={handleSendComment}>
                 <AntDesign name="arrowup" size={14} color="#FFFFFF" />
               </Pressable>
             </View>
