@@ -19,190 +19,165 @@ import { useSelector } from 'react-redux';
 import db from '../../Firebase/config';
 
 export default function CreatePostsScreen({ navigation }) {
-  const [name, setName] = useState('');
-  const [location, setLocation] = useState('');
-  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
-  const [isNameFocused, setIsNameFocused] = useState(false);
-  const [isLocationFocused, setIsLocationFocused] = useState(false);
-
-  const [camera, setCamera] = useState(null);
-  const [photo, setPhoto] = useState(null);
-
-  const [photoLocation, setPhotoLocation] = useState(null);
-
-  const { userId, login } = useSelector(state => state.auth);
-
-  const keyboardHide = () => {
-    setIsKeyboardVisible(false);
-    Keyboard.dismiss();
-  };
-
-  const sendPhoto = () => {
-    navigation.navigate('Публікації', { photo, name, location, ...photoLocation });
-    uploadPostToServer();
-    navigation.navigate('Публікації', {
-      photo,
-      name,
-      location,
-      ...photoLocation,
-    });
-    setName('');
-    setLocation('');
-    setPhoto(null);
-    setIsShowKeyboard(false);
-    // console.log({ photo, name, location, ...photoLocation })
-  };
-
-  const uploadPostToServer = async () => {
-    const photo = await uploadPhotoToServer();
-    const createPost = await db
-      .firestore()
-      .collection('posts')
-      .add({ photo, name, location, userId, login, ...photoLocation });
-  };
-
-  const uploadPhotoToServer = async () => {
-    const response = await fetch(photo);
-    const file = await response.blob();
-
-    const uniquePostId = Date.now().toString();
-
-    await db.storage().ref(`postImage/${uniquePostId}`).put(file);
-
-    const processedPhoto = await db.storage().ref('postImage').child(uniquePostId).getDownloadURL();
-
-    return processedPhoto;
-  };
-
-  // const takePhoto = async () => {
-  //   const photo = await camera.takePictureAsync();
-  //   setPhoto(photo.uri);
-  //   // console.log(photo.uri);
-
-  //   let { status } = await Location.requestForegroundPermissionsAsync();
-  //   if (status !== 'granted') {
-  //     console.log('Permission to access location was denied');
-  //   }
-
-  //   const photoLocation = await Location.getCurrentPositionAsync({});
-
-  //   const coords = {
-  //     latitude: photoLocation.coords.latitude,
-  //     longitude: photoLocation.coords.longitude,
-  //   };
-
-  //   setPhotoLocation(coords);
+  // const [name, setName] = useState('');
+  // const [location, setLocation] = useState('');
+  // const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+  // const [isNameFocused, setIsNameFocused] = useState(false);
+  // const [isLocationFocused, setIsLocationFocused] = useState(false);
+  // const [camera, setCamera] = useState(null);
+  // const [photo, setPhoto] = useState(null);
+  // const [photoLocation, setPhotoLocation] = useState(null);
+  // const { userId, login } = useSelector(state => state.auth);
+  // const keyboardHide = () => {
+  //   setIsKeyboardVisible(false);
+  //   Keyboard.dismiss();
   // };
-
-  const takePhoto = async () => {
-    let { status } = await Camera.requestCameraPermissionsAsync();
-    if (status !== 'granted') {
-      console.log('Permission to access camera was denied');
-      return;
-    }
-
-    try {
-      const photo = await camera.takePictureAsync();
-      setPhoto(photo.uri);
-
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        console.log('Permission to access location was denied');
-      }
-
-      const photoLocation = await Location.getCurrentPositionAsync({});
-
-      const coords = {
-        latitude: photoLocation.coords.latitude,
-        longitude: photoLocation.coords.longitude,
-      };
-
-      setPhotoLocation(coords);
-    } catch (error) {
-      console.log('Error taking photo:', error);
-    }
-  };
-
   // const sendPhoto = () => {
   //   navigation.navigate('Публікації', { photo, name, location, ...photoLocation });
+  //   uploadPostToServer();
+  //   navigation.navigate('Публікації', {
+  //     photo,
+  //     name,
+  //     location,
+  //     ...photoLocation,
+  //   });
   //   setName('');
   //   setLocation('');
   //   setPhoto(null);
-  //   setIsKeyboardVisible(false);
+  //   setIsShowKeyboard(false);
   //   // console.log({ photo, name, location, ...photoLocation })
   // };
-
-  return (
-    <View style={styles.container}>
-      <TouchableWithoutFeedback onPress={keyboardHide}>
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-          {!isKeyboardVisible && (
-            <View>
-              <Camera style={styles.camera} ref={setCamera}>
-                <Pressable onPress={takePhoto} style={styles.snapContainer}>
-                  <MaterialIcons name="photo-camera" size={24} color="#BDBDBD" />
-                </Pressable>
-              </Camera>
-              <Text style={styles.text}>Завантажити фото</Text>
-            </View>
-          )}
-
-          <TextInput
-            value={name}
-            onChangeText={value => setName(value)}
-            placeholder="Назва..."
-            placeholderTextColor={'#BDBDBD'}
-            onFocus={() => {
-              setIsKeyboardVisible(true);
-              setIsNameFocused(true);
-            }}
-            onBlur={() => setIsNameFocused(false)}
-            style={{
-              ...styles.input,
-              borderBottomColor: isNameFocused ? '#ff6c00' : '#e8e8e8',
-              marginTop: 30,
-            }}
-          />
-          <View>
-            <Ionicons
-              name="ios-location-outline"
-              size={24}
-              color="#BDBDBD"
-              style={{
-                ...styles.locationIcon,
-                color: isLocationFocused ? '#ff6c00' : '#BDBDBD',
-              }}
-            />
-            <TextInput
-              value={location}
-              onChangeText={value => setLocation(value)}
-              placeholder="Місцевість..."
-              placeholderTextColor={'#BDBDBD'}
-              onFocus={() => {
-                setIsKeyboardVisible(true);
-                setIsLocationFocused(true);
-              }}
-              onBlur={() => setIsLocationFocused(false)}
-              style={{
-                ...styles.input,
-                borderBottomColor: isLocationFocused ? '#ff6c00' : '#e8e8e8',
-                marginTop: 30,
-                paddingLeft: 25,
-              }}
-            />
-          </View>
-          <Pressable onPress={sendPhoto} style={styles.sendBtn}>
-            <Text style={styles.buttonText}>Опублікувати</Text>
-          </Pressable>
-          <View style={styles.trashIconWrap}>
-            <Pressable style={styles.trashButton}>
-              <FontAwesome5 name="trash-alt" size={24} color="#DADADA" />
-            </Pressable>
-          </View>
-        </KeyboardAvoidingView>
-      </TouchableWithoutFeedback>
-    </View>
-  );
+  // const uploadPostToServer = async () => {
+  //   const photo = await uploadPhotoToServer();
+  //   const createPost = await db
+  //     .firestore()
+  //     .collection('posts')
+  //     .add({ photo, name, location, userId, login, ...photoLocation });
+  // };
+  // const uploadPhotoToServer = async () => {
+  //   const response = await fetch(photo);
+  //   const file = await response.blob();
+  //   const uniquePostId = Date.now().toString();
+  //   await db.storage().ref(`postImage/${uniquePostId}`).put(file);
+  //   const processedPhoto = await db.storage().ref('postImage').child(uniquePostId).getDownloadURL();
+  //   return processedPhoto;
+  // };
+  // // const takePhoto = async () => {
+  // //   const photo = await camera.takePictureAsync();
+  // //   setPhoto(photo.uri);
+  // //   // console.log(photo.uri);
+  // //   let { status } = await Location.requestForegroundPermissionsAsync();
+  // //   if (status !== 'granted') {
+  // //     console.log('Permission to access location was denied');
+  // //   }
+  // //   const photoLocation = await Location.getCurrentPositionAsync({});
+  // //   const coords = {
+  // //     latitude: photoLocation.coords.latitude,
+  // //     longitude: photoLocation.coords.longitude,
+  // //   };
+  // //   setPhotoLocation(coords);
+  // // };
+  // const takePhoto = async () => {
+  //   let { status } = await Camera.requestCameraPermissionsAsync();
+  //   if (status !== 'granted') {
+  //     console.log('Permission to access camera was denied');
+  //     return;
+  //   }
+  //   try {
+  //     const photo = await camera.takePictureAsync();
+  //     setPhoto(photo.uri);
+  //     let { status } = await Location.requestForegroundPermissionsAsync();
+  //     if (status !== 'granted') {
+  //       console.log('Permission to access location was denied');
+  //     }
+  //     const photoLocation = await Location.getCurrentPositionAsync({});
+  //     const coords = {
+  //       latitude: photoLocation.coords.latitude,
+  //       longitude: photoLocation.coords.longitude,
+  //     };
+  //     setPhotoLocation(coords);
+  //   } catch (error) {
+  //     console.log('Error taking photo:', error);
+  //   }
+  // };
+  // // const sendPhoto = () => {
+  // //   navigation.navigate('Публікації', { photo, name, location, ...photoLocation });
+  // //   setName('');
+  // //   setLocation('');
+  // //   setPhoto(null);
+  // //   setIsKeyboardVisible(false);
+  // //   // console.log({ photo, name, location, ...photoLocation })
+  // // };
+  // return (
+  //   <View style={styles.container}>
+  //     <TouchableWithoutFeedback onPress={keyboardHide}>
+  //       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+  //         {!isKeyboardVisible && (
+  //           <View>
+  //             <Camera style={styles.camera} ref={setCamera}>
+  //               <Pressable onPress={takePhoto} style={styles.snapContainer}>
+  //                 <MaterialIcons name="photo-camera" size={24} color="#BDBDBD" />
+  //               </Pressable>
+  //             </Camera>
+  //             <Text style={styles.text}>Завантажити фото</Text>
+  //           </View>
+  //         )}
+  //         <TextInput
+  //           value={name}
+  //           onChangeText={value => setName(value)}
+  //           placeholder="Назва..."
+  //           placeholderTextColor={'#BDBDBD'}
+  //           onFocus={() => {
+  //             setIsKeyboardVisible(true);
+  //             setIsNameFocused(true);
+  //           }}
+  //           onBlur={() => setIsNameFocused(false)}
+  //           style={{
+  //             ...styles.input,
+  //             borderBottomColor: isNameFocused ? '#ff6c00' : '#e8e8e8',
+  //             marginTop: 30,
+  //           }}
+  //         />
+  //         <View>
+  //           <Ionicons
+  //             name="ios-location-outline"
+  //             size={24}
+  //             color="#BDBDBD"
+  //             style={{
+  //               ...styles.locationIcon,
+  //               color: isLocationFocused ? '#ff6c00' : '#BDBDBD',
+  //             }}
+  //           />
+  //           <TextInput
+  //             value={location}
+  //             onChangeText={value => setLocation(value)}
+  //             placeholder="Місцевість..."
+  //             placeholderTextColor={'#BDBDBD'}
+  //             onFocus={() => {
+  //               setIsKeyboardVisible(true);
+  //               setIsLocationFocused(true);
+  //             }}
+  //             onBlur={() => setIsLocationFocused(false)}
+  //             style={{
+  //               ...styles.input,
+  //               borderBottomColor: isLocationFocused ? '#ff6c00' : '#e8e8e8',
+  //               marginTop: 30,
+  //               paddingLeft: 25,
+  //             }}
+  //           />
+  //         </View>
+  //         <Pressable onPress={sendPhoto} style={styles.sendBtn}>
+  //           <Text style={styles.buttonText}>Опублікувати</Text>
+  //         </Pressable>
+  //         <View style={styles.trashIconWrap}>
+  //           <Pressable style={styles.trashButton}>
+  //             <FontAwesome5 name="trash-alt" size={24} color="#DADADA" />
+  //           </Pressable>
+  //         </View>
+  //       </KeyboardAvoidingView>
+  //     </TouchableWithoutFeedback>
+  //   </View>
+  // );
 }
 const styles = StyleSheet.create({
   container: {

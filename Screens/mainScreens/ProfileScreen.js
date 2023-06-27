@@ -2,26 +2,39 @@ import { Text, Image, View, StyleSheet, FlatList, Pressable } from 'react-native
 import { Feather, AntDesign, Ionicons, EvilIcons } from '@expo/vector-icons';
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import db from '../../Firebase/config';
+// import db from '../../Firebase/config';
+import { db } from '../../Firebase/config';
+import { collection, query, onSnapshot, where, getDocs } from 'firebase/firestore';
 
-export default function ProfileScreen({ navigation }) {
+export default function ProfileScreen({ route, navigation }) {
   const dispatch = useDispatch();
   const [userPosts, setUserPosts] = useState([]);
+  const { userId, name } = useSelector(state => state.auth);
 
-  const { userId } = useSelector(state => state.auth);
+  // const { userId } = useSelector(state => state.auth);
 
   useEffect(() => {
     getUserPosts();
   }, []);
 
+  // const getUserPosts = async () => {
+  //   await db
+  //     .firestore()
+  //     .collection('posts')
+  //     .where('userId', '==', userId)
+  //     .onSnapshot(data => setUserPosts(data.docs.map(doc => ({ ...doc.data() }))));
+  // };
   const getUserPosts = async () => {
-    await db
-      .firestore()
-      .collection('posts')
-      .where('userId', '==', userId)
-      .onSnapshot(data => setUserPosts(data.docs.map(doc => ({ ...doc.data() }))));
+    try {
+      const postRef = query(collection(db, 'posts'), where('userId', '==', `${userId}`));
+      onSnapshot(postRef, snapshot => {
+        setUserPosts(snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id })));
+      });
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   };
-
   const signOut = () => {
     dispatch(authSignOutUser());
   };
@@ -69,13 +82,14 @@ export default function ProfileScreen({ navigation }) {
 
                 <Pressable
                   style={styles.location}
-                  onPress={() =>
-                    navigation.navigate('Карта', {
-                      name: item.name,
-                      latitude: item.latitude,
-                      longitude: item.longitude,
-                    })
-                  }
+                  onPress={() => navigation.navigate('Map', { location: item.location })}
+                  // onPress={() =>
+                  //   navigation.navigate('Карта', {
+                  //     name: item.name,
+                  //     latitude: item.latitude,
+                  //     longitude: item.longitude,
+                  //   })
+                  // }
                 >
                   <Ionicons name="ios-location-outline" size={24} color="#BDBDBD" />
                   <Text style={styles.locationText}>{item.location}</Text>

@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import { Text, Image, View, StyleSheet, FlatList, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { EvilIcons } from '@expo/vector-icons';
-import db from '../../Firebase/config';
+import { db } from '../../Firebase/config';
 import { useSelector } from 'react-redux';
 import { collection, doc, onSnapshot, orderBy, query, setDoc } from 'firebase/firestore';
 
@@ -30,7 +30,7 @@ export default function PostsScreen({ route, navigation }) {
 
       onSnapshot(sortedPostsQuery, snapshot => {
         const sortedPosts = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-        setUserPosts(sortedPosts);
+        setPosts(sortedPosts);
       });
     } catch (error) {
       console.log(error);
@@ -94,13 +94,14 @@ export default function PostsScreen({ route, navigation }) {
               </Pressable>
               <Pressable
                 style={styles.location}
-                onPress={() =>
-                  navigation.navigate('Карта', {
-                    name: item.name,
-                    latitude: item.latitude,
-                    longitude: item.longitude,
-                  })
-                }
+                onPress={() => navigation.navigate('Map', { location: item.location })}
+                // onPress={() =>
+                //   navigation.navigate('Карта', {
+                //     name: item.name,
+                //     latitude: item.latitude,
+                //     longitude: item.longitude,
+                //   })
+                // }
               >
                 <Ionicons name="ios-location-outline" size={24} color="#BDBDBD" />
                 <Text style={styles.locationText}>{item.location}</Text>
