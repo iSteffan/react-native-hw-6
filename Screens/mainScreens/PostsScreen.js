@@ -84,7 +84,7 @@ export default function PostsScreen({ route, navigation }) {
         renderItem={({ item }) => (
           <View style={styles.postContainer}>
             <Image source={{ uri: item.photo }} style={styles.postImg} />
-            <Text style={styles.postName}>{item.name}</Text>
+            <Text style={styles.postName}>{item.title}</Text>
             <View style={styles.infoWrap}>
               <Pressable
                 style={styles.comments}
