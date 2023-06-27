@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import * as ImagePicker from 'expo-image-picker';
+import Icon from '@expo/vector-icons/Feather';
+
 import {
   StyleSheet,
   View,
@@ -15,21 +18,24 @@ import {
 import { AntDesign } from '@expo/vector-icons';
 import { useDispatch } from 'react-redux';
 import { authSignUpUser } from '../../Redux/authOperations';
+import { uploadPhotoToServer } from '../../helpers/uploadPhoto';
 
-const initialState = {
-  login: '',
-  email: '',
-  password: '',
-};
+// const initialState = {
+//   login: '',
+//   email: '',
+//   password: '',
+// };
 
 export default function RegistrationScreen({ navigation }) {
-  const [state, setState] = useState(initialState);
+  // const [state, setState] = useState(initialState);
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
 
   const [isLoginFocused, setIsLoginFocused] = useState(false);
   const [isEmailFocused, setIsEmailFocused] = useState(false);
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const [isPasswordHidden, setIsPasswordHidden] = useState(true);
+
+  const [formData, setFormData] = useState({ photo: '', name: '', email: '', password: '' });
 
   const dispatch = useDispatch();
 
@@ -38,45 +44,71 @@ export default function RegistrationScreen({ navigation }) {
     Keyboard.dismiss();
   };
 
-  const handleSubmit = () => {
-    const { email, password, login } = state;
+  const { name, email, password, photo } = formData;
 
+  // const handleSubmit = () => {
+  //   // const { email, password, login } = state;
+
+  //   keyboardHide();
+  //   dispatch(authSignUpUser(state));
+  //   console.log(state);
+  //   setState(initialState);
+  //   checkTextInput();
+  // };
+
+  const handleAddAvatar = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (permissionResult.granted === false) {
+      alert('Ви відмовилися дозволити цій програмі доступ до ваших фотографій');
+      return;
+    }
+
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setFormData(prev => ({ ...prev, photo: result.assets[0].uri }));
+    }
+  };
+
+  // remove avatar
+  const handleRemoveAvatar = () => {
+    setFormData(prev => ({ ...prev, photo: '' }));
+  };
+
+  // check credentials
+  const checkCredentials = () => {
+    if (!photo || !name || !email || !password) {
+      return Alert.alert('', 'Будь ласка, додайте фото та заповніть всі поля форми');
+    }
+  };
+
+  const handleSubmit = async () => {
+    // setSubmitting(true);
+    checkCredentials();
     keyboardHide();
-    dispatch(authSignUpUser(state));
-    console.log(state);
-    setState(initialState);
-    checkTextInput();
-
-    // if (email !== '' && password !== '' && login !== '' && validateEmail(email)) {
-    //   navigation.navigate('Home');
+    // setShowPassword(false);
+    const imageRef = await uploadPhotoToServer(photo);
+    const newUser = {
+      userAvatar: imageRef,
+      name,
+      email,
+      password,
+    };
+    try {
+      await dispatch(authSignUpUser(newUser));
+      setFormData({ name: '', email: '', password: '', photo: '' });
+    } catch (error) {
+      console.log(error);
+    }
+    // finally {
+    //   setSubmitting(false);
     // }
-  };
-
-  const validateEmail = str => {
-    const emailRegex =
-      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return emailRegex.test(str);
-  };
-
-  const checkTextInput = () => {
-    const { login, email, password } = state;
-
-    if (!login.trim()) {
-      Alert.alert('Warning', 'Login is required. Please write your login');
-      return;
-    }
-    if (!email.trim()) {
-      Alert.alert('Warning', 'Email is required. Please write your email');
-      return;
-    }
-    if (!validateEmail(email)) {
-      Alert.alert('Warning', 'Please write valid email');
-      return;
-    }
-    if (!password.trim()) {
-      Alert.alert('Warning', 'Password is required. Please write password');
-      return;
-    }
   };
 
   return (
@@ -89,16 +121,39 @@ export default function RegistrationScreen({ navigation }) {
           <Image source={require('../../assets/images/photo-bg.jpg')} style={styles.image} />
           <View style={styles.formWrap}>
             <View style={styles.avatar}>
-              <Pressable style={styles.avatarButton}>
+              {/* <Pressable style={styles.avatarButton}>
                 <AntDesign name="pluscircleo" size={24} color="#FF6C00" />
+              </Pressable> */}
+              <Image
+                style={styles.avatarPhoto}
+                source={photo ? { uri: photo } : require('../../assets/images/user-photo-2.png')}
+              />
+              <Pressable
+                onPress={photo ? handleRemoveAvatar : handleAddAvatar}
+                accessibilityLabel={photo ? 'Remove Avatar' : 'Add Avatar'}
+                style={{
+                  ...styles.avatarButton,
+                  borderColor: photo ? '#E8E8E8' : '#FF6C00',
+                }}
+              >
+                {photo ? (
+                  <Icon
+                    name="plus"
+                    size={20}
+                    color="#E8E8E8"
+                    style={{ transform: [{ rotate: '-45deg' }] }}
+                  />
+                ) : (
+                  <Icon name="plus" size={20} color="#FF6C00" />
+                )}
               </Pressable>
             </View>
             <Text style={styles.title}>Реєстрація</Text>
 
             <View style={styles.inputWrapper}>
               <TextInput
-                value={state.login}
-                onChangeText={value => setState(prevState => ({ ...prevState, login: value }))}
+                value={name}
+                onChangeText={value => setFormData(prevState => ({ ...prevState, name: value }))}
                 placeholder="Логін"
                 autoComplete="username"
                 placeholderTextColor={'#BDBDBD'}
@@ -115,11 +170,13 @@ export default function RegistrationScreen({ navigation }) {
                 onBlur={() => setIsLoginFocused(false)}
               />
               <TextInput
-                value={state.email}
-                onChangeText={value => setState(prevState => ({ ...prevState, email: value }))}
+                value={email}
+                onChangeText={value => setFormData(prevState => ({ ...prevState, email: value }))}
                 placeholder="Адреса електронної пошти"
                 autoComplete="email"
+                autoCapitalize="none"
                 placeholderTextColor={'#BDBDBD'}
+                keyboardType="email-address"
                 style={{
                   ...styles.input,
                   borderColor: isEmailFocused ? '#ff6c00' : '#e8e8e8',
@@ -134,12 +191,9 @@ export default function RegistrationScreen({ navigation }) {
               />
               <View style={{ position: 'relative' }}>
                 <TextInput
-                  value={state.password}
+                  value={password}
                   onChangeText={value =>
-                    setState(prevState => ({
-                      ...prevState,
-                      password: value,
-                    }))
+                    setFormData(prevState => ({ ...prevState, password: value }))
                   }
                   placeholder="Пароль"
                   placeholderTextColor={'#BDBDBD'}
@@ -187,6 +241,13 @@ export default function RegistrationScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+  avatarPhoto: {
+    borderRadius: 16,
+    backgroundColor: '#F6F6F6',
+
+    width: 120,
+    height: 120,
+  },
   container: {
     alignItems: 'center',
     justifyContent: 'flex-end',
@@ -284,3 +345,30 @@ const styles = StyleSheet.create({
     lineHeight: 19,
   },
 });
+
+// const validateEmail = str => {
+//   const emailRegex =
+//     /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+//   return emailRegex.test(str);
+// };
+
+// const checkTextInput = () => {
+//   const { login, email, password } = state;
+
+//   if (!login.trim()) {
+//     Alert.alert('Warning', 'Login is required. Please write your login');
+//     return;
+//   }
+//   if (!email.trim()) {
+//     Alert.alert('Warning', 'Email is required. Please write your email');
+//     return;
+//   }
+//   if (!validateEmail(email)) {
+//     Alert.alert('Warning', 'Please write valid email');
+//     return;
+//   }
+//   if (!password.trim()) {
+//     Alert.alert('Warning', 'Password is required. Please write password');
+//     return;
+//   }
+// };
