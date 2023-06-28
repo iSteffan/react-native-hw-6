@@ -14,38 +14,11 @@ import {
 } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
-import db from '../../Firebase/config';
+import { db } from '../../Firebase/config';
 import { collection, doc, addDoc, onSnapshot, updateDoc } from 'firebase/firestore';
 
-// function displayDateTime() {
-//   const months = [
-//     'січня',
-//     'лютого',
-//     'березня',
-//     'квітня',
-//     'травня',
-//     'червня',
-//     'липня',
-//     'серпня',
-//     'вересня',
-//     'жовтня',
-//     'листопада',
-//     'грудня',
-//   ];
-//   const now = new Date();
-//   const date = now.getDate();
-//   const month = months[now.getMonth()];
-//   const year = now.getFullYear();
-//   const hours = now.getHours().toString().padStart(2, '0');
-//   const minutes = now.getMinutes().toString().padStart(2, '0');
-
-//   const dateTimeString = `${date} ${month}, ${year} | ${hours}:${minutes}`;
-//   return dateTimeString;
-// }
-
 export default function CommentsScreen({ route }) {
-  const postImage = route.params.image;
-  // const postId = route.params.postId;
+  // const postImage = route.params.image;
   const [comment, setComment] = useState('');
   const [allComments, setAllComments] = useState([]);
 
@@ -53,7 +26,6 @@ export default function CommentsScreen({ route }) {
 
   const { name, userAvatar, email, userId } = useSelector(state => state.auth);
 
-  // const { login } = useSelector(state => state.auth);
   const { id: postId, photo, userId: postOwnerId } = route.params;
 
   const createComment = async () => {
@@ -62,14 +34,13 @@ export default function CommentsScreen({ route }) {
 
     const postDocRef = await doc(db, 'posts', postId);
     const newComment = {
-      timePublished: Date.now().toString(),
-      comment,
       name,
       email,
       userAvatar,
+      comment,
+      timePublished: Date.now().toString(),
       date,
       time,
-      owner: userId === postOwnerId ? 'user' : 'follower',
     };
 
     await addDoc(collection(postDocRef, 'comments'), newComment);
@@ -88,7 +59,7 @@ export default function CommentsScreen({ route }) {
         return dateA - dateB;
       });
 
-      return setComments(sortedComments);
+      return setAllComments(sortedComments);
     });
   };
 
@@ -96,10 +67,6 @@ export default function CommentsScreen({ route }) {
   useEffect(() => {
     getAllComments();
   }, [userId, postId]);
-
-  // useEffect(() => {
-  //   getAllComments();
-  // }, []);
 
   const keyboardHide = () => {
     Keyboard.dismiss();
@@ -118,33 +85,12 @@ export default function CommentsScreen({ route }) {
     setComment('');
   };
 
-  // const createComment = async () => {
-  //   const date = displayDateTime();
-
-  //   db.firestore()
-  //     .collection('posts')
-  //     .doc(postId)
-  //     .collection('comments')
-  //     .add({ comment, login, date });
-
-  //   keyboardHide();
-  //   setComment('');
-  // };
-
-  // const getAllComments = async () => {
-  //   db.firestore()
-  //     .collection('posts')
-  //     .doc(postId)
-  //     .collection('comments')
-  //     .onSnapshot(data => setAllComments(data.docs.map(doc => ({ ...doc.data(), id: doc.id }))));
-  // };
-
   return (
     <TouchableWithoutFeedback onPress={keyboardHide}>
       <View>
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={styles.container}>
-            {!isKeyboardVisible && <Image source={{ uri: postImage }} style={styles.postImage} />}
+            {!isKeyboardVisible && <Image source={{ uri: photo }} style={styles.postImage} />}
             <View>
               <FlatList
                 scrollEnabled={true}
@@ -154,12 +100,14 @@ export default function CommentsScreen({ route }) {
                   <View style={styles.commentContainer}>
                     <View style={styles.commentTextContainer}>
                       <Text style={styles.commentText}>{item.comment}</Text>
-                      <Text style={styles.date}>{item.date}</Text>
+                      <Text style={styles.date}>
+                        {item.date} | {item.time}
+                      </Text>
                     </View>
                     <Image
                       source={{ uri: item.userAvatar }}
                       // source={require('../../assets/images/user-photo-3.png')}
-                      style={styles.image}
+                      style={styles.avatar}
                     />
                   </View>
                 )}
@@ -197,6 +145,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 30,
     backgroundColor: '#fff',
+  },
+  avatar: {
+    width: 28,
+    height: 28,
+    borderRadius: 50,
   },
   postImage: {
     width: '100%',
