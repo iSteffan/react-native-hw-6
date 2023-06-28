@@ -1,15 +1,16 @@
 import { View, Image, Pressable, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
-import { Feather, AntDesign, Ionicons, EvilIcons } from '@expo/vector-icons';
+import { Feather, AntDesign, Ionicons } from '@expo/vector-icons';
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { db } from '../../Firebase/config';
-import { collection, query, onSnapshot, where, getDocs } from 'firebase/firestore';
+import { collection, query, onSnapshot, where } from 'firebase/firestore';
 import { Avatar } from '../../components/Avatar';
+import { authSignOutUser } from '../../Redux/authOperations';
 
 export default function ProfileScreen({ route, navigation }) {
   const dispatch = useDispatch();
   const [userPosts, setUserPosts] = useState([]);
-  const { userId, name, userAvatar } = useSelector(state => state.auth);
+  const { userId, name } = useSelector(state => state.auth);
 
   const getUserPosts = async () => {
     try {

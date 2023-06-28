@@ -39,13 +39,6 @@ export default function RegistrationScreen({ navigation }) {
   const { name, email, password, photo } = formData;
 
   const handleAddAvatar = async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (permissionResult.granted === false) {
-      alert('Ви відмовилися дозволити цій програмі доступ до ваших фотографій');
-      return;
-    }
-
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
@@ -58,15 +51,13 @@ export default function RegistrationScreen({ navigation }) {
     }
   };
 
-  // remove avatar
   const handleRemoveAvatar = () => {
     setFormData(prev => ({ ...prev, photo: '' }));
   };
 
-  // check credentials
   const checkCredentials = () => {
     if (!photo || !name || !email || !password) {
-      return Alert.alert('', 'Будь ласка, додайте фото та заповніть всі поля форми');
+      return Alert.alert('', 'Для успішної реєстрації додайте фото та заповніть всі поля форми');
     }
   };
 
@@ -94,6 +85,7 @@ export default function RegistrationScreen({ navigation }) {
   };
 
   return (
+    // {isDownloading ? (): ()}
     <TouchableWithoutFeedback onPress={keyboardHide}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : null}
