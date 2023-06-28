@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { db } from '../../Firebase/config';
 import { collection, query, onSnapshot, where, getDocs } from 'firebase/firestore';
+import { Avatar } from '../../components/Avatar';
 
 export default function ProfileScreen({ route, navigation }) {
   const dispatch = useDispatch();
@@ -40,14 +41,7 @@ export default function ProfileScreen({ route, navigation }) {
     <View style={styles.container}>
       <Image source={require('../../assets/images/photo-bg.jpg')} style={styles.backgroundImage} />
       <View style={styles.contentWrapper}>
-        <View style={styles.avatar}>
-          <Image source={require('../../assets/images/user-photo-2.png')} />
-
-          {/* <Image source={{ uri: item.userAvatar }} /> */}
-          <Pressable style={styles.avatarButton}>
-            <AntDesign name="pluscircleo" size={24} color="#E8E8E8" />
-          </Pressable>
-        </View>
+        <Avatar />
         <Pressable onPress={signOut} style={styles.logOutButton}>
           <Feather name="log-out" size={24} color="#BDBDBD" />
         </Pressable>
@@ -146,8 +140,8 @@ const styles = StyleSheet.create({
   },
 
   userName: {
-    marginTop: 38,
-    marginBottom: 10,
+    marginTop: -32,
+    marginBottom: 32,
     fontFamily: 'Roboto-Bold',
     color: '#212121',
     fontSize: 30,
@@ -164,8 +158,9 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 25,
   },
   logOutButton: {
-    marginLeft: 'auto',
-    marginTop: 22,
+    position: 'absolute',
+    top: 22,
+    right: 18,
   },
   postContainer: {
     marginBottom: 20,
@@ -175,6 +170,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 240,
     marginBottom: 8,
+    // boxShadow: '0px 4px 4px 0px rgba(0, 0, 0, 0.25)',
   },
   postName: {
     fontFamily: 'Roboto-Medium',
