@@ -5,7 +5,6 @@ import MapView, { Marker } from 'react-native-maps';
 const MapScreen = ({ route }) => {
   const [location, setLocation] = useState({});
 
-  // set location
   useEffect(() => {
     if (route.params) {
       setLocation({

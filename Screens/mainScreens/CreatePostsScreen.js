@@ -32,18 +32,15 @@ const initialPost = {
 };
 
 export default function CreatePostsScreen({ navigation }) {
-  // const [name, setName] = useState('');
-  const [location, setLocation] = useState('');
+  // const [location, setLocation] = useState('');
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const [isNameFocused, setIsNameFocused] = useState(false);
   const [isLocationFocused, setIsLocationFocused] = useState(false);
 
   const [camera, setCamera] = useState(null);
-  const [photo, setPhoto] = useState(null);
+  // const [photo, setPhoto] = useState(null);
 
-  const [photoLocation, setPhotoLocation] = useState(null);
-
-  // const { userId, login } = useSelector(state => state.auth);
+  // const [photoLocation, setPhotoLocation] = useState(null);
 
   const [post, setPost] = useState(initialPost);
   const { image, title, position } = post;
@@ -67,15 +64,13 @@ export default function CreatePostsScreen({ navigation }) {
     }));
   };
 
-  // take photo
   const takePhoto = async () => {
     try {
       const photo = await camera.takePictureAsync();
       if (!photo) return false;
 
       await MediaLibrary.createAssetAsync(photo.uri);
-      // Vibration.vibrate();
-      // setPhotoTaken(true);
+
       getLocation();
       setPost(prevState => ({ ...prevState, image: photo.uri }));
     } catch (error) {
@@ -86,12 +81,9 @@ export default function CreatePostsScreen({ navigation }) {
   const uploadPhotoToServer = async () => {
     const response = await fetch(image);
     const file = await response.blob();
-
     const uniqueImageId = Date.now().toString();
     const path = `images/${uniqueImageId}.jpeg`;
-
     const storageRef = ref(storage, path);
-
     const metadata = {
       contentType: 'image/jpeg',
     };
@@ -101,11 +93,9 @@ export default function CreatePostsScreen({ navigation }) {
     const downloadPhoto = await getDownloadURL(storageRef);
     return downloadPhoto;
   };
-  // upload post to server
+
   const uploadPostToServer = async () => {
     const photo = await uploadPhotoToServer();
-
-    // Cloud Firestore stores data in Documents, which are stored in Collections
     const newPost = {
       photo,
       title,
@@ -125,17 +115,14 @@ export default function CreatePostsScreen({ navigation }) {
     }
   };
 
-  // submit post
   const handlePublishedPost = () => {
     uploadPostToServer();
-    navigation.navigate('Posts', { ...post });
+    navigation.navigate('Публікації', { ...post });
     keyboardHide();
-    // resetFormPost();
-    // setDisabled(true);
+    resetFormPost();
   };
 
   const resetFormPost = () => {
-    // setPhotoTaken(false);
     setPost(initialPost);
   };
 

@@ -1,23 +1,7 @@
 import { useSelector, useDispatch } from 'react-redux';
-import { useRoute } from '../router';
 import { NavigationContainer } from '@react-navigation/native';
 import { useEffect } from 'react';
 import { authStateChangeUser } from '../Redux/authOperations';
-
-// export default function Main() {
-//   const { stateChange } = useSelector(state => state.auth);
-//   const dispatch = useDispatch();
-
-//   useEffect(() => {
-//     dispatch(authStateChangeUser());
-//   }, [stateChange]);
-
-//   const routing = useRoute(stateChange);
-
-//   useEffect(() => {}, []);
-
-//   return <NavigationContainer>{routing}</NavigationContainer>;
-// }
 import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from '../Screens/authScreens/LoginScreen';
 import RegistrationScreen from '../Screens/authScreens/RegistrationScreen';
@@ -56,13 +40,6 @@ export default function Main() {
               options={({ navigation }) => ({
                 title: 'Коментарі',
                 headerTitleAlign: 'center',
-                // headerStyle: styles.headerBox,
-                // headerRightContainerStyle: { paddingRight: 16 },
-                // headerLeftContainerStyle: { paddingLeft: 16 },
-                // headerTitleStyle: styles.headerTitle,
-                // headerTitleAlign: 'center',
-                // headerLeft: () => <CustomBackButton onPress={() => navigation.goBack()} />,
-                // tabBarVisible: false,
                 headerShown: true,
               })}
             />
@@ -72,13 +49,6 @@ export default function Main() {
               options={({ navigation }) => ({
                 title: 'Maпа',
                 headerTitleAlign: 'center',
-                // headerStyle: styles.headerBox,
-                // headerRightContainerStyle: { paddingRight: 16 },
-                // headerLeftContainerStyle: { paddingLeft: 16 },
-                // headerTitleStyle: styles.headerTitle,
-                // headerTitleAlign: 'center',
-                // headerLeft: () => <CustomBackButton onPress={() => navigation.goBack()} />,
-                // tabBarVisible: false,
                 headerShown: true,
               })}
             />

@@ -17,7 +17,6 @@ import { db } from '../../Firebase/config';
 import { collection, doc, addDoc, onSnapshot, updateDoc } from 'firebase/firestore';
 
 export default function CommentsScreen({ route }) {
-  // const postImage = route.params.image;
   const [comment, setComment] = useState('');
   const [allComments, setAllComments] = useState([]);
 
@@ -128,9 +127,9 @@ export default function CommentsScreen({ route }) {
             placeholder="Коментувати..."
             value={comment}
             onChangeText={value => setComment(value)}
-            // onBlur={() => {
-            //   setIsKeyboardVisible(false);
-            // }}
+            onBlur={() => {
+              setIsKeyboardVisible(false);
+            }}
             onFocus={() => {
               setIsKeyboardVisible(true);
             }}

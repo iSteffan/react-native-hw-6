@@ -51,15 +51,13 @@ export default function ProfileScreen({ route, navigation }) {
           keyExtractor={item => item.id}
           data={userPosts}
           renderItem={({ item }) => (
-            <View style={{ ...styles.card, backgroundColor: 'transparent' }}>
-              <View style={styles.imageThumb}>
-                <Image
-                  source={{
-                    uri: item.photo,
-                  }}
-                  style={styles.postImg}
-                />
-              </View>
+            <View style={styles.postCard}>
+              <Image
+                source={{
+                  uri: item.photo,
+                }}
+                style={styles.postImg}
+              />
 
               <Text style={styles.imageTitle}>{item.title}</Text>
               <View style={styles.infoWrap}>
@@ -125,6 +123,9 @@ const styles = StyleSheet.create({
     width: 411,
     zIndex: -1,
   },
+  postCard: {
+    marginBottom: 32,
+  },
   avatar: {
     position: 'absolute',
     left: 147,
@@ -167,111 +168,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   postImg: {
-    width: '100%',
-    height: 240,
-    marginBottom: 8,
-    // boxShadow: '0px 4px 4px 0px rgba(0, 0, 0, 0.25)',
-  },
-  postName: {
-    fontFamily: 'Roboto-Medium',
-    fontSize: 16,
-    color: '#212121',
-    lineHeight: 19,
-    marginBottom: 11,
-  },
-  infoWrap: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  comments: { flexDirection: 'row', alignItems: 'center' },
-  location: { flexDirection: 'row', alignItems: 'center' },
-  commentText: {
-    fontFamily: 'Roboto-Medium',
-    fontWeight: '400',
-    fontSize: 16,
-    color: '#BDBDBD',
-    lineHeight: 19,
-  },
-  locationText: {
-    fontFamily: 'Roboto-Medium',
-    fontWeight: '400',
-    fontSize: 16,
-    color: '#212121',
-    lineHeight: 19,
-    textDecorationLine: 'underline',
-  },
-  // ------------------------------------
-  // mainContainer: {
-  //   position: 'relative',
-  //   flex: 1,
-  //   justifyContent: 'center',
-  //   width: '100%',
-  // },
-  // imageBg: {
-  //   flex: 1,
-  //   resizeMode: 'cover',
-  // },
-  // emptyBox: {
-  //   flex: 1,
-  //   justifyContent: 'center',
-  //   alignItems: 'center',
-  //   padding: 16,
-  //   height: 240,
-  // },
-  // noPosts: {
-  //   marginTop: -32,
-  //   marginBottom: 32,
-  //   color: '#FF6C00',
-  //   fontFamily: 'Roboto_400Regular',
-  //   fontSize: 20,
-  //   lineHeight: 35,
-  //   textAlign: 'center',
-  // },
-  // // header
-  // container: {
-  //   position: 'relative',
-  //   flex: 1,
-  //   alignItems: 'center',
-  //   marginTop: 147,
-  //   paddingHorizontal: 16,
-
-  //   borderTopLeftRadius: 25,
-  //   borderTopRightRadius: 25,
-  // },
-  // // logOut
-  // logoutBtn: {
-  //   position: 'absolute',
-  //   top: 22,
-  //   right: 18,
-  // },
-  // avatarImage: {
-  //   width: '100%',
-  //   height: '100%',
-  //   borderRadius: 16,
-  //   resizeMode: 'cover',
-  // },
-  // // name
-  // name: {
-  //   marginTop: -32,
-  //   marginBottom: 32,
-  //   fontFamily: 'Roboto_500Medium',
-  //   fontSize: 30,
-  //   lineHeight: 35,
-  //   textAlign: 'center',
-  // },
-  // // card
-  // card: {
-  //   marginBottom: 32,
-  //   width: 343,
-  //   height: 299,
-  // },
-  // imageThumb: {
-  //   marginBottom: 8,
-  //   width: '100%',
-  //   height: 240,
-  //   borderRadius: 8,
-  // },
-  postImg: {
     // resizeMode: 'cover',
     marginBottom: 8,
 
@@ -279,7 +175,6 @@ const styles = StyleSheet.create({
     height: 240,
     borderRadius: 8,
   },
-
   imageTitle: {
     marginBottom: 11,
 
@@ -288,27 +183,10 @@ const styles = StyleSheet.create({
     color: '#212121',
     lineHeight: 19,
   },
-
   infoWrap: {
     display: 'flex',
-    // alignItems: 'center',
     justifyContent: 'space-between',
     flexDirection: 'row',
-    // width: 343,
-  },
-  feedbackWrapper: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    flexDirection: 'row',
-    gap: 24,
-  },
-  feedback: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    flexDirection: 'row',
-    gap: 4,
   },
   comments: { flexDirection: 'row', alignItems: 'center' },
   commentText: {
@@ -317,20 +195,10 @@ const styles = StyleSheet.create({
     fontFamily: 'Roboto-Medium',
     fontWeight: '400',
     fontSize: 16,
-    // color: '#BDBDBD',
     lineHeight: 19,
+    color: '#BDBDBD',
   },
-  // feedbackCounter: {
-  //   fontFamily: 'Roboto_400Regular',
-  //   fontSize: 16,
-  //   lineHeight: 19,
-  // },
   location: {
-    // display: 'flex',
-    // alignItems: 'center',
-    // justifyContent: 'space-between',
-    // flexDirection: 'row',
-    // gap: 4,
     flexDirection: 'row',
     alignItems: 'center',
   },
@@ -342,13 +210,4 @@ const styles = StyleSheet.create({
     lineHeight: 19,
     textDecorationLine: 'underline',
   },
-  // backgroundImage: {
-  //   position: 'absolute',
-  //   top: 0,
-  //   left: 0,
-  //   width: '110%',
-  //   resizeMode: 'cover',
-  //   borderTopLeftRadius: 25,
-  //   borderTopRightRadius: 25,
-  // },
 });

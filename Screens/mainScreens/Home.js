@@ -17,7 +17,7 @@ export default function Home({ navigation }) {
 
   return (
     <BottomTab.Navigator
-      initialRouteName="Posts"
+      initialRouteName="Публікації"
       screenOptions={{
         headerTitleAlign: 'center',
         headerStyle: styles.header,
@@ -60,7 +60,7 @@ export default function Home({ navigation }) {
           ),
           headerLeft: () => (
             <Pressable
-              onPress={() => navigation.navigate('Posts')}
+              onPress={() => navigation.navigate('Публікації')}
               style={{ marginLeft: 16, marginTop: 10 }}
             >
               <AntDesign name="arrowleft" size={24} color="#212121CC" />
@@ -68,7 +68,7 @@ export default function Home({ navigation }) {
           ),
           tabBarStyle: { display: 'none' },
         }}
-        name="CreatePosts"
+        name="Створити публікацію"
         component={CreatePostsScreen}
       />
       <BottomTab.Screen

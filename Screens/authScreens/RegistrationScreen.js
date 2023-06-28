@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import Icon from '@expo/vector-icons/Feather';
-
 import {
   StyleSheet,
   View,
@@ -14,22 +13,15 @@ import {
   Pressable,
   Image,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
-import { AntDesign } from '@expo/vector-icons';
 import { useDispatch } from 'react-redux';
 import { authSignUpUser } from '../../Redux/authOperations';
 import { uploadPhotoToServer } from '../../helpers/uploadPhoto';
 
-// const initialState = {
-//   login: '',
-//   email: '',
-//   password: '',
-// };
-
 export default function RegistrationScreen({ navigation }) {
-  // const [state, setState] = useState(initialState);
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
-
+  const [isDownloading, setIsDownloading] = useState(false);
   const [isLoginFocused, setIsLoginFocused] = useState(false);
   const [isEmailFocused, setIsEmailFocused] = useState(false);
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
@@ -45,16 +37,6 @@ export default function RegistrationScreen({ navigation }) {
   };
 
   const { name, email, password, photo } = formData;
-
-  // const handleSubmit = () => {
-  //   // const { email, password, login } = state;
-
-  //   keyboardHide();
-  //   dispatch(authSignUpUser(state));
-  //   console.log(state);
-  //   setState(initialState);
-  //   checkTextInput();
-  // };
 
   const handleAddAvatar = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -89,10 +71,10 @@ export default function RegistrationScreen({ navigation }) {
   };
 
   const handleSubmit = async () => {
-    // setSubmitting(true);
+    setIsDownloading(true);
     checkCredentials();
     keyboardHide();
-    // setShowPassword(false);
+
     const imageRef = await uploadPhotoToServer(photo);
     const newUser = {
       userAvatar: imageRef,
@@ -100,15 +82,15 @@ export default function RegistrationScreen({ navigation }) {
       email,
       password,
     };
+
     try {
       await dispatch(authSignUpUser(newUser));
       setFormData({ name: '', email: '', password: '', photo: '' });
     } catch (error) {
       console.log(error);
+    } finally {
+      setIsDownloading(false);
     }
-    // finally {
-    //   setSubmitting(false);
-    // }
   };
 
   return (
@@ -121,9 +103,6 @@ export default function RegistrationScreen({ navigation }) {
           <Image source={require('../../assets/images/photo-bg.jpg')} style={styles.image} />
           <View style={styles.formWrap}>
             <View style={styles.avatar}>
-              {/* <Pressable style={styles.avatarButton}>
-                <AntDesign name="pluscircleo" size={24} color="#FF6C00" />
-              </Pressable> */}
               <Image
                 style={styles.avatarPhoto}
                 source={photo ? { uri: photo } : require('../../assets/images/user-photo-2.png')}
@@ -149,7 +128,6 @@ export default function RegistrationScreen({ navigation }) {
               </Pressable>
             </View>
             <Text style={styles.title}>Реєстрація</Text>
-
             <View style={styles.inputWrapper}>
               <TextInput
                 value={name}
