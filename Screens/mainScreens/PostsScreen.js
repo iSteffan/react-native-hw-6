@@ -76,39 +76,44 @@ export default function PostsScreen({ route, navigation }) {
             <Image source={{ uri: item.photo }} style={styles.postImg} />
             <Text style={styles.postName}>{item.title}</Text>
             <View style={styles.infoWrap}>
-              <Pressable
-                style={styles.comments}
-                onPress={() => navigation.navigate('Comments', item)}
-              >
-                <AntDesign name="message1" size={20} color="#BDBDBD" />
-                <Text
-                  // style={styles.commentText}
-                  style={{
-                    ...styles.commentText,
-                    color: item.comments?.length > 0 ? '#FF6C00' : '#BDBDBD',
-                  }}
+              <View style={{ ...styles.infoWrap, width: 80 }}>
+                <Pressable
+                  style={styles.comments}
+                  onPress={() => navigation.navigate('Comments', item)}
                 >
-                  0
-                </Text>
-              </Pressable>
-              <TouchableOpacity
-                style={styles.comments}
-                onPress={() => toggleLike(item.id, item.likes, item.likeStatus)}
-              >
-                <AntDesign
-                  name="like2"
-                  size={20}
-                  color={item.likes?.length > 0 ? '#FF6C00' : '#BDBDBD'}
-                />
-                <Text
-                  style={{
-                    ...styles.commentText,
-                    color: item.likes?.length > 0 ? '#FF6C00' : '#BDBDBD',
-                  }}
+                  <AntDesign
+                    name="message1"
+                    size={20}
+                    color={item.comments?.length > 0 ? '#FF6C00' : '#BDBDBD'}
+                  />
+                  <Text
+                    style={{
+                      ...styles.commentText,
+                      color: item.comments?.length > 0 ? '#FF6C00' : '#BDBDBD',
+                    }}
+                  >
+                    {item.comments ? item.comments?.length : 0}
+                  </Text>
+                </Pressable>
+                <TouchableOpacity
+                  style={styles.comments}
+                  onPress={() => toggleLike(item.id, item.likes, item.likeStatus)}
                 >
-                  {item.likes ? item.likes?.length : 0}
-                </Text>
-              </TouchableOpacity>
+                  <AntDesign
+                    name="like2"
+                    size={20}
+                    color={item.likes?.length > 0 ? '#FF6C00' : '#BDBDBD'}
+                  />
+                  <Text
+                    style={{
+                      ...styles.commentText,
+                      color: item.likes?.length > 0 ? '#FF6C00' : '#BDBDBD',
+                    }}
+                  >
+                    {item.likes ? item.likes?.length : 0}
+                  </Text>
+                </TouchableOpacity>
+              </View>
               <Pressable
                 style={styles.location}
                 onPress={() => navigation.navigate('Map', { location: item.location })}
