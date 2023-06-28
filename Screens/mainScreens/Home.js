@@ -48,7 +48,7 @@ export default function Home({ navigation }) {
             </Pressable>
           ),
         }}
-        name="Posts"
+        name="Публікації"
         component={PostsScreen}
       />
       <BottomTab.Screen

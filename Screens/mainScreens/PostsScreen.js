@@ -187,7 +187,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Roboto-Medium',
     fontWeight: '400',
     fontSize: 16,
-    // color: '#BDBDBD',
     lineHeight: 19,
   },
   locationText: {
@@ -198,16 +197,4 @@ const styles = StyleSheet.create({
     lineHeight: 19,
     textDecorationLine: 'underline',
   },
-  // feedback: {
-  //   display: 'flex',
-  //   alignItems: 'center',
-  //   justifyContent: 'space-between',
-  //   flexDirection: 'row',
-  //   gap: 4,
-  // },
-  // feedbackCounter: {
-  //   fontFamily: 'Roboto-Regular',
-  //   fontSize: 16,
-  //   lineHeight: 19,
-  // },
 });
