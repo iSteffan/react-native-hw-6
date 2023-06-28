@@ -3,14 +3,13 @@ import {
   Text,
   TouchableWithoutFeedback,
   Keyboard,
-  KeyboardAvoidingView,
   Platform,
   View,
   Image,
   StyleSheet,
   TextInput,
   FlatList,
-  Pressable,
+  TouchableOpacity,
 } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
@@ -26,7 +25,7 @@ export default function CommentsScreen({ route }) {
 
   const { name, userAvatar, email, userId } = useSelector(state => state.auth);
 
-  const { id: postId, photo, userId: postOwnerId } = route.params;
+  const { id: postId, photo } = route.params;
 
   const createComment = async () => {
     const date = new Date().toLocaleDateString('uk-UA');
@@ -63,7 +62,6 @@ export default function CommentsScreen({ route }) {
     });
   };
 
-  // get all comments
   useEffect(() => {
     getAllComments();
   }, [userId, postId]);
@@ -73,133 +71,183 @@ export default function CommentsScreen({ route }) {
     setIsKeyboardVisible(false);
   };
 
-  // send comment
   const handleSendComment = () => {
-    // if (!comment.trim()) {
-    //   Alert.alert(`Будь ласка, введіть свій коментар 😌`);
-    //   return;
-    // }
     createComment();
     Keyboard.dismiss();
-    // Alert.alert(`Ваш коментар успішно надіслано 😉`);
     setComment('');
+  };
+
+  const renderItem = ({ item }) => {
+    return (
+      <TouchableWithoutFeedback onPress={keyboardHide}>
+        <View style={styles.wrapper}>
+          <View>
+            <Image style={styles.avatar} source={{ uri: item.userAvatar }} />
+          </View>
+
+          <View style={styles.commentWrapper}>
+            <Text style={styles.userName}>{item.name}</Text>
+            <View style={styles.commentsTextWrapper}>
+              <Text style={styles.comments}>{item.comment}</Text>
+            </View>
+            <Text style={styles.commentDate}>
+              {item.date} | {item.time}
+            </Text>
+          </View>
+        </View>
+      </TouchableWithoutFeedback>
+    );
   };
 
   return (
     <TouchableWithoutFeedback onPress={keyboardHide}>
-      <View>
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-          <View style={styles.container}>
-            {!isKeyboardVisible && <Image source={{ uri: photo }} style={styles.postImage} />}
-            <View>
-              <FlatList
-                scrollEnabled={true}
-                data={allComments}
-                keyExtractor={item => item.id}
-                renderItem={({ item }) => (
-                  <View style={styles.commentContainer}>
-                    <View style={styles.commentTextContainer}>
-                      <Text style={styles.commentText}>{item.comment}</Text>
-                      <Text style={styles.date}>
-                        {item.date} | {item.time}
-                      </Text>
-                    </View>
-                    <Image
-                      source={{ uri: item.userAvatar }}
-                      // source={require('../../assets/images/user-photo-3.png')}
-                      style={styles.avatar}
-                    />
-                  </View>
-                )}
-              />
-            </View>
+      <View style={styles.container}>
+        <View style={styles.imageWrapper}>
+          <Image
+            style={styles.postImage}
+            source={{
+              uri: photo,
+            }}
+          />
+        </View>
 
-            <View style={styles.inputWrap}>
-              <TextInput
-                value={comment}
-                onChangeText={value => setComment(value)}
-                // onChangeText={setComment}
-                placeholder="Коментувати..."
-                placeholderTextColor={'#BDBDBD'}
-                style={styles.input}
-                onFocus={() => {
-                  setIsKeyboardVisible(true);
-                }}
-              />
-              <Pressable style={styles.sendIcon} onPress={handleSendComment}>
-                <AntDesign name="arrowup" size={14} color="#FFFFFF" />
-              </Pressable>
-            </View>
-          </View>
-        </KeyboardAvoidingView>
+        <FlatList
+          showsVerticalScrollIndicator={false}
+          data={allComments}
+          keyExtractor={item => item.id.toString()}
+          renderItem={renderItem}
+        />
+
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            multiline={true}
+            selectionColor="#FF6C00"
+            blurOnSubmit={true}
+            placeholderTextColor="#BDBDBD"
+            placeholder="Коментувати..."
+            value={comment}
+            onChangeText={value => setComment(value)}
+            // onBlur={() => {
+            //   setIsKeyboardVisible(false);
+            // }}
+            onFocus={() => {
+              setIsKeyboardVisible(true);
+            }}
+          />
+          <TouchableOpacity style={styles.sendIcon} onPress={handleSendComment}>
+            <AntDesign name="arrowup" size={14} color="#FFFFFF" />
+          </TouchableOpacity>
+        </View>
       </View>
     </TouchableWithoutFeedback>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 180,
-    // height: '100%',
+    flex: 1,
     paddingHorizontal: 16,
-    paddingTop: 30,
-    backgroundColor: '#fff',
+    paddingTop: 32,
+    paddingBottom: 16,
+
+    backgroundColor: '#FFFFFF',
+  },
+  imageWrapper: {
+    alignItems: 'center',
+
+    height: 240,
+    borderRadius: 8,
+  },
+  postImage: { marginBottom: 32, width: '100%', height: 240, borderRadius: 8 },
+  wrapper: {
+    display: 'flex',
+    flexDirection: 'row-reverse',
+    alignItems: 'baseline',
+    flexGrow: 1,
+    gap: 5,
+    marginTop: 24,
   },
   avatar: {
     width: 28,
     height: 28,
     borderRadius: 50,
   },
-  postImage: {
-    width: '100%',
-    height: 240,
-    marginBottom: 32,
-    borderRadius: 8,
-  },
-  inputWrap: { paddingBottom: 16 },
-  input: {
-    backgroundColor: '#E8E8E8',
-    height: 50,
-    padding: 16,
-    borderWidth: 1,
-    borderRadius: 100,
-    borderColor: '#E8E8E8',
-    fontFamily: 'Roboto-Regular',
-  },
-  sendIcon: {
-    backgroundColor: '#FF6C00',
-    width: 34,
-    height: 34,
-    borderRadius: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-    color: '#FFFFFF',
-    position: 'absolute',
-    right: 8,
-    top: 8,
-  },
-  commentTextContainer: {
-    backgroundColor: '#00000008',
-    padding: 16,
-    width: 299,
-  },
-  commentText: {
-    fontFamily: 'Roboto-Regular',
-    color: '#212121',
+  userName: {
+    marginBottom: 10,
+
+    fontFamily: 'Roboto-Medium',
     fontSize: 13,
     lineHeight: 18,
-    marginBottom: 8,
+    color: '#212121',
   },
-  commentContainer: {
+  commentsTextWrapper: {
     display: 'flex',
-    flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 24,
+    flexWrap: 'wrap',
   },
-  date: {
+  commentWrapper: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+
+    maxWidth: 320,
+    borderRadius: 6,
+    backgroundColor: 'rgba(0, 0, 0, 0.03)',
+  },
+
+  comments: {
+    textAlign: 'left',
+    marginBottom: 5,
+
+    fontSize: 13,
+    lineHeight: 18,
+    color: '#212121',
+  },
+
+  commentDate: {
     color: '#BDBDBD',
     fontSize: 10,
     lineHeight: 12,
+  },
+  inputContainer: {
+    position: 'relative',
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 16,
+    paddingBottom: Platform.OS === 'ios' ? keyboardHeight : 0,
+    alignSelf: 'flex-end',
+
+    width: '100%',
+  },
+  input: {
+    paddingTop: 16,
+    paddingBottom: 16,
+    paddingLeft: 16,
+    paddingRight: 54,
+
+    width: '100%',
+    height: 50,
+    fontSize: 16,
+    lineHeight: 19,
+    textAlignVertical: 'top',
+    backgroundColor: 'rgba(0, 0, 0, 0.03)',
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
+    borderRadius: 20,
+    color: '#212121',
+  },
+  sendIcon: {
+    position: 'absolute',
+    right: 8,
+    top: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+
+    width: 34,
+    height: 34,
+    borderRadius: 50,
+    color: '#FFFFFF',
+    backgroundColor: '#FF6C00',
   },
 });
