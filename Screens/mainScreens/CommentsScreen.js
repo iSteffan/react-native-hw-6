@@ -24,7 +24,7 @@ export default function CommentsScreen({ route }) {
 
   const { name, userAvatar, email, userId } = useSelector(state => state.auth);
 
-  const { id: postId, photo } = route.params;
+  const { id: postId, photo, userId: postOwnerId } = route.params;
 
   const createComment = async () => {
     const date = new Date().toLocaleDateString('uk-UA');
@@ -39,6 +39,7 @@ export default function CommentsScreen({ route }) {
       timePublished: Date.now().toString(),
       date,
       time,
+      owner: userId === postOwnerId ? 'user' : 'follower',
     };
 
     await addDoc(collection(postDocRef, 'comments'), newComment);
@@ -79,7 +80,12 @@ export default function CommentsScreen({ route }) {
   const renderItem = ({ item }) => {
     return (
       <TouchableWithoutFeedback onPress={keyboardHide}>
-        <View style={styles.wrapper}>
+        <View
+          style={{
+            ...styles.wrapper,
+            flexDirection: item?.owner === 'user' ? 'row' : 'row-reverse',
+          }}
+        >
           <View>
             <Image style={styles.avatar} source={{ uri: item.userAvatar }} />
           </View>
@@ -161,7 +167,7 @@ const styles = StyleSheet.create({
   postImage: { marginBottom: 32, width: '100%', height: 240, borderRadius: 8 },
   wrapper: {
     display: 'flex',
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'baseline',
     flexGrow: 1,
     gap: 5,

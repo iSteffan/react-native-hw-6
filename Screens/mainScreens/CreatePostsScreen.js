@@ -141,7 +141,7 @@ export default function CreatePostsScreen({ navigation }) {
                   <MaterialIcons name="photo-camera" size={24} color="#BDBDBD" />
                 </Pressable>
               </Camera>
-              <Text style={styles.text}>Завантажити фото</Text>
+              <Text style={styles.text}>Редагувати фото</Text>
             </View>
           )}
 
